@@ -19,3 +19,9 @@
 *.exe
 *.out
 *.app
+/bin/
+/build.xml
+/local.properties
+/obj/
+/proguard-project.txt
+/project.properties
