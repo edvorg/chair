@@ -1,0 +1,5 @@
+#! /bin/bash
+
+find . -name *.cpp -exec ./license/install-license-impl {} \;
+find . -name *.h -exec ./license/install-license-impl {} \;
+find . -name *.hpp -exec ./license/install-license-impl {} \;
