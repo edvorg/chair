@@ -27,13 +27,16 @@
 
 #include "LevelProgress.hpp"
 #include "ScreenShaker.hpp"
+#include <Box2D/Box2D.h>
 
 namespace test {
 
-  // main application class, handles all game objects
-  class App {
+// main application class, handles all game objects
+class App {
 
-  public:
+public:
+    App();
+
 	void Init();
 	void Update(double dt);
 	void Draw();
@@ -50,8 +53,8 @@ namespace test {
 	// set real device screen resolution
 	void ScreenSize(float newWidth, float newHeight);
 
-  protected:
-  private:
+protected:
+private:
 	// screen res independent field width
 	const float fieldWidth = 100.0;
 	// maximum allowed number of players
@@ -63,8 +66,10 @@ namespace test {
 	float screenHeight = 0.0f;
 
 	LevelProgress progress;
-	ScreenShaker shaker;
-  };
+    ScreenShaker shaker;
+
+    b2World world;
+};
 
 }
 

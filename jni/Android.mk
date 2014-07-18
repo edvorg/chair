@@ -26,7 +26,7 @@ $(patsubst ./%, %, \
 endef
 
 LOCAL_SRC_FILES := $(call all-cpp-files-under, .)
-
+LOCAL_C_INCLUDES := $(LOCAL_PATH)
 LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue
 LOCAL_CFLAGS :=-D__GXX_EXPERIMENTAL_CXX0X__

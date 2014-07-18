@@ -32,39 +32,42 @@
 
 namespace test {
 
-  void App::Init() {
-  }
+App::App() : world(b2Vec2(0, -9.8)) {
+}
 
-  void App::Update(double dt) {
+void App::Init() {
+}
+
+void App::Update(double dt) {
 	progress.Update(dt);
 	shaker.Update(dt);
 
 	if (!progress.IsPaused()) {
 		// update gameplay here
 	}
-  }
+}
 
-  void App::Draw() {
+void App::Draw() {
 	SetProjection(fieldWidth, fieldHeight);
 
 	if (!progress.IsPaused()) {
-	  shaker.ApplyMatrix();
-	  DrawNumber(false,
-				 fieldWidth - 5.0f,
-				 fieldHeight - 10.0f,
-				 1,
-				 1.5,
-				 progress.GetLevel());
+		shaker.ApplyMatrix();
+		DrawNumber(false,
+				   fieldWidth - 5.0f,
+				   fieldHeight - 10.0f,
+				   1,
+				   1.5,
+				   progress.GetLevel());
 	}
 
 	SetTranslate(0, 0);
 	progress.Draw();
-  }
+}
 
-  void App::Release() {
-  }
+void App::Release() {
+}
 
-  void App::Touch(int player, float newX, float newY) {
+void App::Touch(int player, float newX, float newY) {
 	auto x = newX / screenWidth * fieldWidth;
 	auto y = (1.0 - newY / screenHeight) * fieldHeight;
 
@@ -72,17 +75,17 @@ namespace test {
 
 	if (!progress.IsPaused()) {
 	}
-  }
+}
 
-  void App::TouchEnd(int player, float newX, float newY) {
-  }
+void App::TouchEnd(int player, float newX, float newY) {
+}
 
-  void App::ScreenSize(float newWidth, float newHeight) {
+void App::ScreenSize(float newWidth, float newHeight) {
 	screenWidth = (newWidth > 0.1 ? newWidth : 1.0f);
 	screenHeight = (newHeight > 0.1 ? newHeight : 1.0f);
 	fieldHeight = fieldWidth * screenHeight / screenWidth;
 
 	progress.FieldSize(fieldWidth, fieldHeight);
-  }
+}
 
 }
