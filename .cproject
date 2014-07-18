@@ -19,11 +19,16 @@
 						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.709392810" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.709392810.70766175" name=""/>
 							<builder command="/Users/dmitryg/Documents/android-ndk-r9d/ndk-build" id="org.eclipse.cdt.build.core.settings.default.builder.363514999" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
-							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.994517876" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.994517876" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs">
+								<option id="org.eclipse.cdt.build.core.settings.holder.libpaths.998297050" name="Library Paths" superClass="org.eclipse.cdt.build.core.settings.holder.libpaths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/Users/dmitryg/Documents/android-ndk-r9d/sources/cxx-stl/gnu-libstdc++/4.8/include/libs"/>
+								</option>
+							</tool>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1254665854" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.892480373" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/Users/dmitryg/Documents/android-ndk-r9d/platforms/android-17/arch-arm/usr/include"/>
 									<listOptionValue builtIn="false" value="/Users/dmitryg/Documents/android-ndk-r9d/sources/cxx-stl/gnu-libstdc++/4.8/include/tr1"/>
+									<listOptionValue builtIn="false" value="/Users/dmitryg/Documents/android-ndk-r9d/sources/cxx-stl/gnu-libstdc++/4.8/include"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1813579473" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
@@ -39,6 +44,7 @@
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.1758976440" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/Users/dmitryg/Documents/android-ndk-r9d/platforms/android-17/arch-arm/usr/include"/>
 									<listOptionValue builtIn="false" value="/Users/dmitryg/Documents/android-ndk-r9d/sources/cxx-stl/gnu-libstdc++/4.8/include/tr1"/>
+									<listOptionValue builtIn="false" value="/Users/dmitryg/Documents/android-ndk-r9d/sources/cxx-stl/gnu-libstdc++/4.8/include"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.841345806" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
@@ -64,4 +70,5 @@
 			<resource resourceType="PROJECT" workspacePath="/NativeActivity"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
