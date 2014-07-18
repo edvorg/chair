@@ -85,9 +85,9 @@ private:
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
 
-    static const auto playerShapesCount = 32;
-    static const auto playerStatesCount = 3;
-    static const auto playerFluidSize = 0.5;
+    static constexpr const auto playerShapesCount = 32;
+    static constexpr const auto playerStatesCount = 3;
+    static constexpr const auto playerFluidSize = 0.5f;
 
     const std::vector<float> playerGravityStates {
         -9.8, -9.8, 5.0,
