@@ -75,11 +75,11 @@ App::App() : world(b2Vec2(0, -9.8)) {
 
 	for (auto i = 0; i < playerShapesCount; ++i) {
 		const auto shape = new b2PolygonShape;
-		shape->SetAsBox(1, 1);
+		shape->SetAsBox(playerFluidSize, playerFluidSize);
 
 		b2BodyDef bdef;
 
-		bdef.position.x = 25 + rand() % 50;
+		bdef.position.x = 0 + rand() % 50;
 		bdef.position.y = 15 + rand() % 30;
 		bdef.type = b2_dynamicBody;
 
@@ -114,17 +114,17 @@ void App::Update(double dt) {
 	if (!progress.IsPaused()) {
 		world.Step(dt, 1, 2);
 
-		world.SetGravity({ 0, -14.8f * playerStateInv + 5.0f });
+		world.SetGravity({ 0, playerGravityState });
 
 		for (auto i = 0; i < playerBodies.size(); i++)
 			playerPoints[i] = playerBodies[i]->GetPosition();
 
 		for (auto& b1 : playerBodies) {
-			b1->SetAngularVelocity(-600 * dt * playerState);
+			b1->SetAngularVelocity(dt * playerAngleState);
 
 			for (auto& b2 : playerBodies) {
 				b2Vec2 dir = b1->GetPosition() - b2->GetPosition();
-				b2->ApplyForceToCenter(10 * playerStateInv * dir, true);
+				b2->ApplyForceToCenter(playerForceState * dir, true);
 			}
 		}
 	}
@@ -162,6 +162,29 @@ void App::Touch(int player, float newX, float newY) {
 	if (!progress.IsPaused()) {
 		playerState = std::min(std::max(y / fieldHeight, 0.0f), 1.0f);
 		playerStateInv = 1.0f - playerState;
+
+		if (playerState <= 0.5) {
+			const auto remap = playerState * 2.0f;
+			const auto remapInv = (1.0f - remap);
+
+			playerAngleState = remapInv * playerAngleStates[0] +
+				remap * playerAngleStates[1];
+			playerForceState = remapInv * playerForceStates[0] +
+				remap * playerForceStates[1];
+			playerGravityState = remapInv * playerGravityStates[0] +
+				remap * playerGravityStates[1];
+		}
+		else {
+			const auto remap = (playerState - 0.5f) * 2.0f;
+			const auto remapInv = (1.0f - remap);
+
+			playerAngleState = remapInv * playerAngleStates[1] +
+				remap * playerAngleStates[2];
+			playerForceState = remapInv * playerForceStates[1] +
+				remap * playerForceStates[2];
+			playerGravityState = remapInv * playerGravityStates[1] +
+				remap * playerGravityStates[2];
+		}
 	}
 }
 

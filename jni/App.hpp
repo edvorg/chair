@@ -73,6 +73,11 @@ private:
 
     float playerState = 0.0f;
     float playerStateInv = 1.0f;
+
+    float playerGravityState = -9.8f;
+    float playerAngleState = 0.0f;
+    float playerForceState = 0.0f;
+
 	std::vector<b2Vec2> playerPoints;
 	std::vector<b2Body*> playerBodies;
     std::vector<std::shared_ptr<b2Shape>> playerShapes;
@@ -80,7 +85,22 @@ private:
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
 
-    static const auto playerShapesCount = 40;
+    static const auto playerShapesCount = 32;
+    static const auto playerStatesCount = 3;
+    static const auto playerFluidSize = 0.5;
+
+    const std::vector<float> playerGravityStates {
+        -9.8, -9.8, 5.0,
+    };
+
+    const std::vector<float> playerAngleStates {
+        // 0, -600 * 0.5, -600 * 1.0,
+        0,-300, -600,
+    };
+
+    const std::vector<float> playerForceStates {
+        1, 0.0, 0.1,
+    };
 };
 
 }
