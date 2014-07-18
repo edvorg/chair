@@ -31,6 +31,8 @@
 #include "graphics/Graphics.hpp"
 #include "graphics/debugdraw.hpp"
 
+#include <vector>
+
 namespace test {
 
 App::App() : world(b2Vec2(0, -9.8)) {
@@ -69,6 +71,7 @@ App::App() : world(b2Vec2(0, -9.8)) {
 	playerShapes.resize(playerShapesCount);
 	playerBodies.resize(playerShapesCount);
 	playerPoints.resize(playerShapesCount);
+
 
 	for (auto i = 0; i < playerShapesCount; ++i) {
 		const auto shape = new b2PolygonShape;
@@ -113,6 +116,8 @@ void App::Update(double dt) {
 	if (!progress.IsPaused()) {
 		world.Step(dt, 1, 1);
 
+		for (auto i = 0; i < playerBodies.size(); i++)
+			playerPoints[i] = playerBodies[i]->GetPosition();
 
 		for (auto& b1 : playerBodies) {
 
@@ -137,6 +142,8 @@ void App::Draw() {
 				   progress.GetLevel());
 
 		world.DrawDebugData();
+
+
 	}
 
 	SetTranslate(0, 0);

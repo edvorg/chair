@@ -25,12 +25,11 @@
 #ifndef GRAPHICS
 #define GRAPHICS
 
-namespace test {
+#include <Box2D/Box2D.h>
+#include <vector>
+#include <stack>
 
-  class Player;
-  class Asteroid;
-  class DecorateStar;
-  class Bullet;
+namespace test {
   class LevelProgress;
 
   // apply translation matrix
@@ -39,10 +38,12 @@ namespace test {
   void SetProjection(float fieldWidth, float fieldHeight);
   void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number);
   void DrawDigit(float x, float y, float sizex, float sizey, unsigned int digit);
-  void DrawPlayer(const Player & player);
-  void DrawAsteroid(const Asteroid & asteroid);
-  void DrawDecorateStar(const DecorateStar & star);
-  void DrawBullet(const Bullet & bullet);
+
+  void drawPoly(b2Vec2* points, int32 vertexCount, b2Color color);
+  //void DrawPlayer(const Player & player);
+  //void DrawObstacle(const Asteroid & asteroid);
+  //void DrawDecorateStar(const DecorateStar & star);
+  //void DrawBullet(const Bullet & bullet);
   void DrawProgress(const LevelProgress & progress);
 
 }
