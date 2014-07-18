@@ -120,7 +120,6 @@ void App::Update(double dt) {
 			playerPoints[i] = playerBodies[i]->GetPosition();
 
 		for (auto& b1 : playerBodies) {
-
 			for (auto& b2 : playerBodies) {
 				b2Vec2 dir = b1->GetPosition() - b2->GetPosition();
 				b2->ApplyForceToCenter(dir, true);

@@ -39,7 +39,7 @@ namespace test {
   void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number);
   void DrawDigit(float x, float y, float sizex, float sizey, unsigned int digit);
 
-  void drawPoly(b2Vec2* points, int32 vertexCount, b2Color color);
+  void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color);
   //void DrawPlayer(const Player & player);
   //void DrawObstacle(const Asteroid & asteroid);
   //void DrawDecorateStar(const DecorateStar & star);

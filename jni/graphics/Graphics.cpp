@@ -45,7 +45,7 @@ namespace test {
 	glOrthof(0, fieldWidth, 0, fieldHeight, 1, -1);
   }
 
-  void drawPoly(b2Vec2* points, int32 vertexCount, b2Color color) {
+  void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color) {
 
       /*GLfloat vertices[points.size()*2];
 	  int i=0;
