@@ -80,7 +80,7 @@ private:
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
 
-    static const auto playerShapesCount = 32;
+    static const auto playerShapesCount = 40;
 };
 
 }
