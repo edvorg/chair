@@ -29,7 +29,6 @@
 #include <functional>
 #include <stack>
 
-#include "RandomizeParams.hpp"
 #include "Misc.hpp"
 #include "Dimensions.hpp"
 
@@ -93,8 +92,8 @@ namespace test {
 	// spawn particles every period seconds
 	void SetSpawning(bool enable);
 
-	inline float GetFieldWidth() const { return params.fieldWidth; }
-	inline float GetFieldHeight() const { return params.fieldHeight; }
+	inline float GetFieldWidth() const { return fieldWidth; }
+	inline float GetFieldHeight() const { return fieldHeight; }
 
   protected:
 	void Spawn();
@@ -108,7 +107,6 @@ namespace test {
 	double spawnPeriod = 1.0;
 	// number of used particles
 	int used = 0;
-	RandomizeParams params;
 	// spawn particles every period seconds
 	bool spawning = true;
 
@@ -131,6 +129,9 @@ namespace test {
 	std::stack<PostSpawn> postSpawns;
 	// optional particle pre process after destroy
 	std::stack<PreDestroy> preDestroys;
+
+	float fieldWidth = 1.0;
+	float fieldHeight = 1.0;
   };
 
   template<class PARTICLE>
@@ -169,14 +170,14 @@ namespace test {
 		  (lifes.size() && pool[i].GetLifeTimer() > lifes.top()()) ||
 
 		  (pool[i].GetPosY() < y && pool[i].GetVelY() < 0.0f) ||
-		  (pool[i].GetPosY() > y + params.fieldHeight && pool[i].GetVelY() > 0.0f) ||
+		  (pool[i].GetPosY() > y + fieldHeight && pool[i].GetVelY() > 0.0f) ||
 		  (pool[i].GetPosX() < x && pool[i].GetVelX() < 0.0f) ||
-		  (pool[i].GetPosX() > x + params.fieldWidth && pool[i].GetVelX() > 0.0f) ||
+		  (pool[i].GetPosX() > x + fieldWidth && pool[i].GetVelX() > 0.0f) ||
 
 	  	  pool[i].GetPosY() < y - marginBottom ||
-	  	  pool[i].GetPosY() > y + params.fieldHeight + marginTop ||
+	  	  pool[i].GetPosY() > y + fieldHeight + marginTop ||
 	  	  pool[i].GetPosX() < x - marginLeft ||
-	  	  pool[i].GetPosX() > x + params.fieldWidth + marginRight) {
+	  	  pool[i].GetPosX() > x + fieldWidth + marginRight) {
 
 	  	pool[i].SetDead(false);
 	  	Destroy(i);
@@ -235,8 +236,8 @@ namespace test {
 
   template<class PARTICLE>
   void ParticleSystem<PARTICLE>::FieldSize(float newWidth, float newHeight) {
-	params.fieldWidth = newWidth;
-	params.fieldHeight = newHeight;
+	fieldWidth = newWidth;
+	fieldHeight = newHeight;
   }
 
   template<class PARTICLE>

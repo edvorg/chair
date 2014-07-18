@@ -54,9 +54,9 @@ namespace test {
   void LevelProgress::Release() {
   }
 
-  void LevelProgress::FieldSize(float width, float height) {
-	params.fieldWidth = width;
-	params.fieldHeight = height;
+void LevelProgress::FieldSize(float width, float height) {
+	fieldWidth = width;
+	fieldHeight = height;
   }
 
   void LevelProgress::RestartLevel() {

@@ -29,10 +29,6 @@
 #include <math.h>
 #include <algorithm>
 
-#include "Bullet.hpp"
-#include "DecorateStar.hpp"
-#include "Asteroid.hpp"
-#include "Player.hpp"
 #include "LevelProgress.hpp"
 
 #include <stack>
@@ -262,143 +258,6 @@ namespace test {
 	}
   }
 
-  void DrawPlayer(const Player & player) {
-	// TODO rewrite using vertex buffer and array objects
-	static const int corners = 3;
-	static GLfloat vertices[corners * 2] = {
-	  0.75, -1.0,
-	  0.0, 1.0,
-	  -0.75, -1.0,
-	};
-	static GLubyte indices[corners] = {
-	  0, 1, 2
-	};
-
-	if (player.IsSpawned()) {
-	  // render
-	  glMatrixMode(GL_MODELVIEW);
-	  glPushMatrix();
-	  glTranslatef(player.GetX(), player.GetY(), 0);
-	  glRotatef(player.GetAngle(), 0, 0, 1);
-	  glScalef(player.GetSize(), player.GetSize(), 1);
-	  glEnableClientState(GL_VERTEX_ARRAY);
-	  glVertexPointer(2, GL_FLOAT, 0, vertices);
-	  glDrawElements(GL_LINE_LOOP, corners, GL_UNSIGNED_BYTE, indices);
-	  glDisableClientState(GL_VERTEX_ARRAY);
-	  glPopMatrix();
-	}
-  }
-  void DrawAsteroid(const Asteroid & asteroid) {
-	// TODO rewrite using vertex buffer and array objects
-	static const int corners = 8;
-	static GLfloat vertices[corners * 2];
-	static GLubyte indices[corners];
-	static bool verticesInited = false;
-
-	if (!verticesInited) {
-	  float angle = 0;
-	  for (unsigned int i = 0; i < corners; i++) {
-		vertices[i * 2] = cos(angle);
-		vertices[i * 2 + 1] = sin(angle);
-		indices[i] = i;
-		angle += 2.0 * M_PI / corners;
-	  }
-	  verticesInited = true;
-	}
-
-	GLfloat currentColor[4];
-	glGetFloatv(GL_CURRENT_COLOR, currentColor);
-
-	glColor4f(0x94 / 255.0f, 0x8c / 255.0f, 0x75 / 255.0f, 1.0f);
-
-	// render
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glTranslatef(asteroid.GetPosX(), asteroid.GetPosY(), 0);
-	glRotatef(asteroid.GetAngle(), 0, 0, 1);
-	glScalef(asteroid.GetSize(), asteroid.GetSize(), 1);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(2, GL_FLOAT, 0, vertices);
-	glDrawElements(GL_LINE_LOOP, corners, GL_UNSIGNED_BYTE, indices);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glPopMatrix();
-
-	glColor4f(currentColor[0],
-			  currentColor[1],
-			  currentColor[2],
-			  currentColor[3]);
-  }
-  void DrawDecorateStar(const DecorateStar & star) {
-	// TODO rewrite using vertex buffer and array objects
-	static const int corners = 1;
-	static GLfloat vertices[corners * 2] = {
-	  0.0f, 0.0f,
-	};
-	static GLubyte indices[corners] = {
-	  0,
-	};
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	GLfloat currentColor[4];
-	GLfloat oldSize;
-	glGetFloatv(GL_CURRENT_COLOR, currentColor);
-	glGetFloatv(GL_POINT_SIZE, &oldSize);
-
-	glPointSize(star.GetSize());
-    glColor4f(0xbe / 255.0f, 0xb4 / 255.0f, 0xfa / 255.0f, 1.0f);
-
-	// render
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glTranslatef(star.GetPosX(), star.GetPosY(), 0);
-	glScalef(star.GetSize(), star.GetSize(), 1);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(2, GL_FLOAT, 0, vertices);
-	glDrawElements(GL_POINTS, corners, GL_UNSIGNED_BYTE, indices);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glPopMatrix();
-
-	glPointSize(oldSize);
-	glColor4f(currentColor[0],
-			  currentColor[1],
-			  currentColor[2],
-			  currentColor[3]);
-
-	glDisable(GL_BLEND);
-  }
-  void DrawBullet(const Bullet & bullet) {
-	// TODO rewrite using vertex buffer and array objects
-	static const int corners = 8;
-	static GLfloat vertices[corners * 2];
-	static GLubyte indices[corners];
-	static bool verticesInited = false;
-
-	if (!verticesInited) {
-	  float angle = 0;
-	  for (unsigned int i = 0; i < corners; i++) {
-		vertices[i * 2] = cos(angle);
-		vertices[i * 2 + 1] = sin(angle);
-		indices[i] = i;
-		angle += 2.0 * M_PI / corners;
-	  }
-	  verticesInited = true;
-	}
-
-	// render
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glTranslatef(bullet.GetPosX(), bullet.GetPosY(), 0);
-	glRotatef(bullet.GetAngle(), 0, 0, 1);
-	glScalef(bullet.GetSize(), bullet.GetSize(), 1);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(2, GL_FLOAT, 0, vertices);
-	glDrawElements(GL_LINE_LOOP, corners, GL_UNSIGNED_BYTE, indices);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glPopMatrix();
-  }
-
   void DrawProgress(const LevelProgress & progress) {
 	if (progress.IsPaused()) {
 	  // TODO rewrite using vertex buffer and array objects
@@ -422,11 +281,11 @@ namespace test {
 	  // render
 	  glMatrixMode(GL_MODELVIEW);
 	  glPushMatrix();
-	  glTranslatef(progress.GetParams().fieldWidth * 0.5f,
-				   progress.GetParams().fieldHeight * 0.5f,
+	  glTranslatef(progress.getFieldWidth() * 0.5f,
+				   progress.getFieldHeight() * 0.5f,
 				   0);
-	  glScalef(progress.playButtonSize * progress.GetParams().fieldWidth,
-			   progress.playButtonSize * progress.GetParams().fieldWidth, 1);
+	  glScalef(progress.playButtonSize * progress.getFieldWidth(),
+			   progress.playButtonSize * progress.getFieldWidth(), 1);
 	  glEnableClientState(GL_VERTEX_ARRAY);
 	  glVertexPointer(2, GL_FLOAT, 0, vertices);
 	  glDrawElements(GL_LINE_LOOP, corners, GL_UNSIGNED_BYTE, indices);
@@ -460,10 +319,10 @@ namespace test {
 	  // render
 	  glMatrixMode(GL_MODELVIEW);
 	  glPushMatrix();
-	  glTranslatef(progress.GetParams().fieldWidth - progress.lineWidth / progress.GetParams().fieldWidth,
+	  glTranslatef(progress.getFieldWidth() - progress.lineWidth / progress.getFieldWidth(),
 				   0,
 				   0);
-	  glScalef(1, progress.GetLevelTimer() / progress.GetLevelTime() * progress.GetParams().fieldHeight, 1);
+	  glScalef(1, progress.GetLevelTimer() / progress.GetLevelTime() * progress.getFieldHeight(), 1);
 	  glEnableClientState(GL_VERTEX_ARRAY);
 	  glVertexPointer(2, GL_FLOAT, 0, vertices);
 	  glDrawElements(GL_LINE_LOOP, corners, GL_UNSIGNED_BYTE, indices);

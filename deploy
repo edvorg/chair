@@ -1,5 +1,3 @@
 #! /bin/bash
 
-ndk-build
-ant debug
-adb install -r bin/NativeActivity-debug.apk
+ndk-build && ant debug && adb install -r bin/NativeActivity-debug.apk
