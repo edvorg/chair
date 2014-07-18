@@ -35,6 +35,21 @@ namespace test {
 
 App::App() : world(b2Vec2(0, -9.8)) {
 	world.SetDebugDraw(new graphics::DebugDraw);
+
+	b2BodyDef bdef;
+
+	bdef.position.x = 50;
+	bdef.position.y = 50;
+
+	const auto body = world.CreateBody(&bdef);
+
+	const auto shape = new b2PolygonShape;
+	shape->SetAsBox(50, 50);
+
+	b2FixtureDef fdef;
+	fdef.shape = shape;
+
+	const auto fixt = body->CreateFixture(&fdef);
 }
 
 void App::Init() {
@@ -44,9 +59,9 @@ void App::Update(double dt) {
 	progress.Update(dt);
 	shaker.Update(dt);
 
-	if (!progress.IsPaused()) {
-		// update gameplay here
-	}
+
+	if (!progress.IsPaused())
+		world.Step(dt, 2, 4);
 }
 
 void App::Draw() {
@@ -60,6 +75,8 @@ void App::Draw() {
 				   1,
 				   1.5,
 				   progress.GetLevel());
+
+		world.DrawDebugData();
 	}
 
 	SetTranslate(0, 0);
