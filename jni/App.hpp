@@ -69,6 +69,9 @@ private:
     ScreenShaker shaker;
 
     b2World world;
+
+	std::vector<b2Vec2> playerPoints;
+	std::vector<b2Body*> playerBodies;
 };
 
 }

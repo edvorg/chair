@@ -29,10 +29,12 @@
 #include <algorithm>
 
 #include "Graphics.hpp"
+#include "graphics/debugdraw.hpp"
 
 namespace test {
 
 App::App() : world(b2Vec2(0, -9.8)) {
+	world.SetDebugDraw(new graphics::DebugDraw);
 }
 
 void App::Init() {
