@@ -64,9 +64,9 @@ App::App() : world(b2Vec2(0, -9.8)) {
 	}
 
 	borderBodies[0]->SetTransform({ 50, 0 }, 0);
-	// borderBodies[1]->SetTransform({ 350, 0 }, 0);
+	borderBodies[1]->SetTransform({ 350, 0 }, 0);
 	borderBodies[2]->SetTransform({ 50, fieldHeight }, 0);
-	// borderBodies[3]->SetTransform({ 350, 50 * screenHeight / screenWidth }, 0);
+	borderBodies[3]->SetTransform({ 350, 50 * screenHeight / screenWidth }, 0);
 
 	playerShapes.resize(playerShapesCount);
 	playerBodies.resize(playerShapesCount);
@@ -81,6 +81,9 @@ App::App() : world(b2Vec2(0, -9.8)) {
 
 		bdef.position.x = 25 + rand() % 50;
 		bdef.position.y = 25 + rand() % 50;
+		bdef.angle = 45;
+		bdef.angularVelocity = 10;
+		// bdef.angularDamping = 1;
 		bdef.awake = true;
 		bdef.allowSleep = true;
 		bdef.active = true;
