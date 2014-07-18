@@ -24,11 +24,11 @@
 
 #include "App.hpp"
 
-#include <stdlib.h>
-#include <math.h>
+#include <cstdlib>
+#include <cmath>
 #include <algorithm>
 
-#include "Graphics.hpp"
+#include "graphics/Graphics.hpp"
 #include "graphics/debugdraw.hpp"
 
 namespace test {
