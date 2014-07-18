@@ -17,7 +17,9 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := native-activity
-LOCAL_SRC_FILES := main.cpp App.cpp Asteroids.cpp Asteroid.cpp Player.cpp Dimensions.cpp Bullet.cpp Bullets.cpp SpliceAsteroids.cpp LevelProgress.cpp DecorateStar.cpp DecorateStars.cpp Graphics.cpp CometTail.cpp ScreenShaker.cpp
+FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
+LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
+#LOCAL_SRC_FILES := main.cpp App.cpp Asteroids.cpp Asteroid.cpp Player.cpp Dimensions.cpp Bullet.cpp Bullets.cpp SpliceAsteroids.cpp LevelProgress.cpp DecorateStar.cpp DecorateStars.cpp Graphics.cpp CometTail.cpp ScreenShaker.cpp
 LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue
 LOCAL_CFLAGS :=-D__GXX_EXPERIMENTAL_CXX0X__
