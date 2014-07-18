@@ -31,6 +31,7 @@
 #include "graphics/Graphics.hpp"
 #include "graphics/debugdraw.hpp"
 
+#include <log.h>
 #include <vector>
 
 namespace test {
@@ -65,13 +66,12 @@ App::App() : world(b2Vec2(0, -9.8)) {
 
 	borderBodies[0]->SetTransform({ 50, 0 }, 0);
 	borderBodies[1]->SetTransform({ 350, 0 }, 0);
-	borderBodies[2]->SetTransform({ 50, fieldHeight }, 0);
-	borderBodies[3]->SetTransform({ 350, 50 * screenHeight / screenWidth }, 0);
+	borderBodies[2]->SetTransform({ 50, 55 }, 0);
+	borderBodies[3]->SetTransform({ 350, 55 }, 0);
 
 	playerShapes.resize(playerShapesCount);
 	playerBodies.resize(playerShapesCount);
 	playerPoints.resize(playerShapesCount);
-
 
 	for (auto i = 0; i < playerShapesCount; ++i) {
 		const auto shape = new b2PolygonShape;
@@ -80,19 +80,14 @@ App::App() : world(b2Vec2(0, -9.8)) {
 		b2BodyDef bdef;
 
 		bdef.position.x = 25 + rand() % 50;
-		bdef.position.y = 25 + rand() % 50;
-		bdef.angle = 45;
-		bdef.angularVelocity = 10;
-		// bdef.angularDamping = 1;
-		bdef.awake = true;
-		bdef.allowSleep = true;
-		bdef.active = true;
+		bdef.position.y = 15 + rand() % 30;
 		bdef.type = b2_dynamicBody;
 
 		const auto body = world.CreateBody(&bdef);
 
 		b2FixtureDef fdef;
 		fdef.shape = shape;
+		fdef.density = 1.0;
 
 		const auto fixt = body->CreateFixture(&fdef);
 
@@ -117,15 +112,19 @@ void App::Update(double dt) {
 	shaker.Update(dt);
 
 	if (!progress.IsPaused()) {
-		world.Step(dt, 1, 1);
+		world.Step(dt, 1, 2);
+
+		world.SetGravity({ 0, -14.8f * playerStateInv + 5.0f });
 
 		for (auto i = 0; i < playerBodies.size(); i++)
 			playerPoints[i] = playerBodies[i]->GetPosition();
 
 		for (auto& b1 : playerBodies) {
+			b1->SetAngularVelocity(-600 * dt * playerState);
+
 			for (auto& b2 : playerBodies) {
 				b2Vec2 dir = b1->GetPosition() - b2->GetPosition();
-				b2->ApplyForceToCenter(dir, true);
+				b2->ApplyForceToCenter(10 * playerStateInv * dir, true);
 			}
 		}
 	}
@@ -136,16 +135,15 @@ void App::Draw() {
 
 	if (!progress.IsPaused()) {
 		shaker.ApplyMatrix();
+
+		world.DrawDebugData();
+
 		DrawNumber(false,
 				   fieldWidth - 5.0f,
 				   fieldHeight - 10.0f,
 				   1,
 				   1.5,
 				   progress.GetLevel());
-
-		world.DrawDebugData();
-
-
 	}
 
 	SetTranslate(0, 0);
@@ -157,11 +155,13 @@ void App::Release() {
 
 void App::Touch(int player, float newX, float newY) {
 	auto x = newX / screenWidth * fieldWidth;
-	auto y = (1.0 - newY / screenHeight) * fieldHeight;
+	auto y = (1.0f - newY / screenHeight) * fieldHeight;
 
 	progress.Touch(newX, newY);
 
 	if (!progress.IsPaused()) {
+		playerState = std::min(std::max(y / fieldHeight, 0.0f), 1.0f);
+		playerStateInv = 1.0f - playerState;
 	}
 }
 

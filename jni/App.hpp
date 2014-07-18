@@ -71,6 +71,8 @@ private:
 
     b2World world;
 
+    float playerState = 0.0f;
+    float playerStateInv = 1.0f;
 	std::vector<b2Vec2> playerPoints;
 	std::vector<b2Body*> playerBodies;
     std::vector<std::shared_ptr<b2Shape>> playerShapes;
@@ -78,7 +80,7 @@ private:
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
 
-    static const auto playerShapesCount = 16;
+    static const auto playerShapesCount = 32;
 };
 
 }
