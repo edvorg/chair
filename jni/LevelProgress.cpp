@@ -24,7 +24,7 @@
 
 #include "LevelProgress.hpp"
 
-#include "Graphics.hpp"
+#include "graphics/Graphics.hpp"
 
 namespace test {
 

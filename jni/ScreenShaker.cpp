@@ -26,7 +26,7 @@
 
 #include <math.h>
 
-#include "Graphics.hpp"
+#include "graphics/Graphics.hpp"
 
 namespace test {
 
