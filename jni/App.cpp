@@ -36,20 +36,71 @@ namespace test {
 App::App() : world(b2Vec2(0, -9.8)) {
 	world.SetDebugDraw(new graphics::DebugDraw);
 
-	b2BodyDef bdef;
+	borderShapes.resize(4);
+	borderBodies.resize(4);
 
-	bdef.position.x = 50;
-	bdef.position.y = 50;
+	for (auto i = 0; i < 4; ++i) {
+		const auto shape = new b2PolygonShape;
+		shape->SetAsBox(150, 5);
 
-	const auto body = world.CreateBody(&bdef);
+		b2BodyDef bdef;
 
-	const auto shape = new b2PolygonShape;
-	shape->SetAsBox(50, 50);
+		bdef.awake = true;
+		bdef.allowSleep = true;
+		bdef.active = true;
+		bdef.type = b2_kinematicBody;
 
-	b2FixtureDef fdef;
-	fdef.shape = shape;
+		const auto body = world.CreateBody(&bdef);
 
-	const auto fixt = body->CreateFixture(&fdef);
+		b2FixtureDef fdef;
+		fdef.shape = shape;
+
+		const auto fixt = body->CreateFixture(&fdef);
+
+		borderShapes[i].reset(shape);
+		borderBodies[i] = body;
+	}
+
+	borderBodies[0]->SetTransform({ 50, 0 }, 0);
+	// borderBodies[1]->SetTransform({ 350, 0 }, 0);
+	borderBodies[2]->SetTransform({ 50, fieldHeight }, 0);
+	// borderBodies[3]->SetTransform({ 350, 50 * screenHeight / screenWidth }, 0);
+
+	playerShapes.resize(playerShapesCount);
+	playerBodies.resize(playerShapesCount);
+	playerPoints.resize(playerShapesCount);
+
+	for (auto i = 0; i < playerShapesCount; ++i) {
+		const auto shape = new b2PolygonShape;
+		shape->SetAsBox(1, 1);
+
+		b2BodyDef bdef;
+
+		bdef.position.x = 25 + rand() % 50;
+		bdef.position.y = 25 + rand() % 50;
+		bdef.awake = true;
+		bdef.allowSleep = true;
+		bdef.active = true;
+		bdef.type = b2_dynamicBody;
+
+		const auto body = world.CreateBody(&bdef);
+
+		b2FixtureDef fdef;
+		fdef.shape = shape;
+
+		const auto fixt = body->CreateFixture(&fdef);
+
+		playerShapes[i].reset(shape);
+		playerBodies[i] = body;
+		playerPoints[i] = bdef.position;
+	}
+}
+
+App::~App() {
+	for (auto& b : playerBodies)
+		world.DestroyBody(b);
+	for (auto& b : borderBodies)
+		world.DestroyBody(b);
 }
 
 void App::Init() {
@@ -59,9 +110,18 @@ void App::Update(double dt) {
 	progress.Update(dt);
 	shaker.Update(dt);
 
+	if (!progress.IsPaused()) {
+		world.Step(dt, 1, 1);
 
-	if (!progress.IsPaused())
-		world.Step(dt, 2, 4);
+
+		for (auto& b1 : playerBodies) {
+
+			for (auto& b2 : playerBodies) {
+				b2Vec2 dir = b1->GetPosition() - b2->GetPosition();
+				b2->ApplyForceToCenter(dir, true);
+			}
+		}
+	}
 }
 
 void App::Draw() {

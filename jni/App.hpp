@@ -36,6 +36,7 @@ class App {
 
 public:
     App();
+    ~App();
 
 	void Init();
 	void Update(double dt);
@@ -72,6 +73,12 @@ private:
 
 	std::vector<b2Vec2> playerPoints;
 	std::vector<b2Body*> playerBodies;
+    std::vector<std::shared_ptr<b2Shape>> playerShapes;
+
+    std::vector<std::shared_ptr<b2Shape>> borderShapes;
+    std::vector<b2Body*> borderBodies;
+
+    static const auto playerShapesCount = 16;
 };
 
 }
