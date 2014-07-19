@@ -36,11 +36,16 @@
 
 namespace test {
 
-App::App() : world(b2Vec2(0, -9.8)) {
-	world.SetDebugDraw(new graphics::DebugDraw);
+App::App() :
+	world(b2Vec2(0, -9.8)),
+	playerPoints(playerBodiesCount),
+	playerBodies(playerBodiesCount),
+	playerEyes(playerEyesCount),
+	playerShapes(playerBodiesCount + playerEyesCount),
+	borderShapes(4),
+	borderBodies(4) {
 
-	borderShapes.resize(4);
-	borderBodies.resize(4);
+	world.SetDebugDraw(new graphics::DebugDraw);
 
 	for (auto i = 0; i < 4; ++i) {
 		const auto shape = new b2PolygonShape;
@@ -69,11 +74,7 @@ App::App() : world(b2Vec2(0, -9.8)) {
 	borderBodies[2]->SetTransform({ 50, 55 }, 0);
 	borderBodies[3]->SetTransform({ 350, 55 }, 0);
 
-	playerShapes.resize(playerShapesCount);
-	playerBodies.resize(playerShapesCount);
-	playerPoints.resize(playerShapesCount);
-
-	for (auto i = 0; i < playerShapesCount; ++i) {
+	for (auto i = 0; i < playerBodiesCount; ++i) {
 		const auto shape = new b2PolygonShape;
 		shape->SetAsBox(playerFluidSize, playerFluidSize);
 

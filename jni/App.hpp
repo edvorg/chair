@@ -57,7 +57,8 @@ public:
 protected:
 private:
 
-    static constexpr const auto playerShapesCount = 32;
+    static constexpr const auto playerBodiesCount = 32;
+    static constexpr const auto playerEyesCount = 2;
     static constexpr const auto playerStatesCount = 3;
     static constexpr const auto playerFluidSize = 0.5f;
 
@@ -93,6 +94,7 @@ private:
 
 	std::vector<b2Vec2> playerPoints;
 	std::vector<b2Body*> playerBodies;
+    std::vector<b2Body*> playerEyes;
     std::vector<std::shared_ptr<b2Shape>> playerShapes;
 
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
