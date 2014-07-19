@@ -16,6 +16,13 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+LOCAL_MODULE    := libpng
+LOCAL_SRC_FILES := png/libpng.a
+
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
 LOCAL_MODULE    := native-activity
 
 define all-cpp-files-under
@@ -26,9 +33,10 @@ $(patsubst ./%, %, \
 endef
 
 LOCAL_SRC_FILES := $(call all-cpp-files-under, .)
+
 LOCAL_C_INCLUDES := $(LOCAL_PATH)
-LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
-LOCAL_STATIC_LIBRARIES := android_native_app_glue
+LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM -lz
+LOCAL_STATIC_LIBRARIES := android_native_app_glue png
 LOCAL_CFLAGS :=-D__GXX_EXPERIMENTAL_CXX0X__
 LOCAL_CPPFLAGS  := -std=c++11
 
