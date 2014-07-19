@@ -38,10 +38,12 @@ namespace test {
 
 App::App() :
 	world(b2Vec2(0, -9.8)),
-	playerPoints(playerBodiesCount),
+	playerBodiesPoints(playerBodiesCount),
 	playerBodies(playerBodiesCount),
-	playerEyes(playerEyesCount),
-	playerShapes(playerBodiesCount + playerEyesCount),
+	playerBodiesShapes(playerBodiesCount),
+	playerEyesBodiesPoints(playerEyesCount),
+	playerEyesBodies(playerEyesCount),
+	playerEyesBodiesShapes(playerEyesCount),
 	borderShapes(4),
 	borderBodies(4) {
 
@@ -76,7 +78,7 @@ App::App() :
 
 	for (auto i = 0; i < playerBodiesCount; ++i) {
 		const auto shape = new b2PolygonShape;
-		shape->SetAsBox(playerFluidSize, playerFluidSize);
+		shape->SetAsBox(playerBodySize, playerBodySize);
 
 		b2BodyDef bdef;
 
@@ -92,14 +94,39 @@ App::App() :
 
 		const auto fixt = body->CreateFixture(&fdef);
 
-		playerShapes[i].reset(shape);
+		playerBodiesShapes[i].reset(shape);
 		playerBodies[i] = body;
-		playerPoints[i] = bdef.position;
+		playerBodiesPoints[i] = bdef.position;
+	}
+
+	for (auto i = 0; i < playerEyesCount; ++i) {
+		const auto shape = new b2PolygonShape;
+		shape->SetAsBox(playerEyeSize, playerEyeSize);
+
+		b2BodyDef bdef;
+
+		bdef.position.x = 0 + rand() % 50;
+		bdef.position.y = 15 + rand() % 30;
+		bdef.type = b2_dynamicBody;
+
+		const auto body = world.CreateBody(&bdef);
+
+		b2FixtureDef fdef;
+		fdef.shape = shape;
+		fdef.density = 1.0;
+
+		const auto fixt = body->CreateFixture(&fdef);
+
+		playerEyesBodiesShapes[i].reset(shape);
+		playerEyesBodies[i] = body;
+		playerEyesBodiesPoints[i] = bdef.position;
 	}
 }
 
 App::~App() {
 	for (auto& b : playerBodies)
+		world.DestroyBody(b);
+	for (auto& b : playerEyesBodies)
 		world.DestroyBody(b);
 	for (auto& b : borderBodies)
 		world.DestroyBody(b);
@@ -118,7 +145,10 @@ void App::Update(double dt) {
 		world.SetGravity({ 0, playerGravityState });
 
 		for (auto i = 0; i < playerBodies.size(); i++)
-			playerPoints[i] = playerBodies[i]->GetPosition();
+			playerBodiesPoints[i] = playerBodies[i]->GetPosition();
+
+		for (auto i = 0; i < playerEyesBodies.size(); i++)
+			playerEyesBodiesPoints[i] = playerEyesBodies[i]->GetPosition();
 
 		for (auto& b1 : playerBodies) {
 			b1->SetAngularVelocity(dt * playerAngleState);

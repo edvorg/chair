@@ -60,7 +60,8 @@ private:
     static constexpr const auto playerBodiesCount = 32;
     static constexpr const auto playerEyesCount = 2;
     static constexpr const auto playerStatesCount = 3;
-    static constexpr const auto playerFluidSize = 0.5f;
+    static constexpr const auto playerBodySize = 0.5f;
+    static constexpr const auto playerEyeSize = 0.75f;
 
     const std::vector<float> playerGravityStates { -12.8, -9.8, 1.0 };
     const std::vector<float> playerAngleStates { 0.0, -300, -700 };
@@ -83,6 +84,8 @@ private:
 
     b2World world;
 
+    /// player
+
     float playerState = 0.0f;
     float playerStateInv = 1.0f;
 
@@ -92,10 +95,15 @@ private:
     float playerAngleState = playerAngleStates[playerStatePoint];
     float playerForceState = playerForceStates[playerStatePoint];
 
-	std::vector<b2Vec2> playerPoints;
+	std::vector<b2Vec2> playerBodiesPoints;
 	std::vector<b2Body*> playerBodies;
-    std::vector<b2Body*> playerEyes;
-    std::vector<std::shared_ptr<b2Shape>> playerShapes;
+    std::vector<std::shared_ptr<b2Shape>> playerBodiesShapes;
+
+    std::vector<b2Vec2> playerEyesBodiesPoints;
+    std::vector<b2Body*> playerEyesBodies;
+    std::vector<std::shared_ptr<b2Shape>> playerEyesBodiesShapes;
+
+    /// borders
 
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
