@@ -56,6 +56,17 @@ public:
 
 protected:
 private:
+
+    static constexpr const auto playerShapesCount = 32;
+    static constexpr const auto playerStatesCount = 3;
+    static constexpr const auto playerFluidSize = 0.5f;
+
+    const std::vector<float> playerGravityStates { -12.8, -9.8, 1.0 };
+    const std::vector<float> playerAngleStates { 0.0, -300, -700 };
+    const std::vector<float> playerForceStates { 1.25, 0.0, 0.05 };
+
+    const std::vector<float> playerStatePoints { 0.0, 0.493519, 1.0 };
+
 	// screen res independent field width
 	const float fieldWidth = 100.0;
 	// maximum allowed number of players
@@ -76,9 +87,9 @@ private:
 
     int playerStatePoint = 0;
 
-    float playerGravityState = -9.8f;
-    float playerAngleState = 0.0f;
-    float playerForceState = 0.0f;
+    float playerGravityState = playerGravityStates[playerStatePoint];
+    float playerAngleState = playerAngleStates[playerStatePoint];
+    float playerForceState = playerForceStates[playerStatePoint];
 
 	std::vector<b2Vec2> playerPoints;
 	std::vector<b2Body*> playerBodies;
@@ -86,16 +97,6 @@ private:
 
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
-
-    static constexpr const auto playerShapesCount = 32;
-    static constexpr const auto playerStatesCount = 3;
-    static constexpr const auto playerFluidSize = 0.5f;
-
-    const std::vector<float> playerGravityStates { -12.8, -9.8, 1.0 };
-    const std::vector<float> playerAngleStates { 0.0, -300, -600 };
-    const std::vector<float> playerForceStates { 1.0, 0.0, 0.05 };
-
-    const std::vector<float> playerStatePoints { 0.0, 0.493519, 1.0 };
 };
 
 }

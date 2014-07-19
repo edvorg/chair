@@ -156,43 +156,44 @@ void App::Release() {
 void App::Touch(int player, float newX, float newY) {
 	auto x = newX / screenWidth * fieldWidth;
 	auto y = (1.0f - newY / screenHeight) * fieldHeight;
-
-	progress.Touch(newX, newY);
 }
 
 void App::TouchEnd(int player, float newX, float newY) {
-	if (!progress.IsPaused()) {
-		playerStatePoint++;
-		if (playerStatePoint >= playerStatePoints.size()) {
-			playerStatePoint = 0;
-			shaker.Shake();
-		}
+	if (progress.IsPaused()) {
+		progress.Touch(newX, newY);
+		return;
+	}
 
-		playerState = playerStatePoints[playerStatePoint];
-		playerStateInv = 1.0f - playerState;
+	playerStatePoint++;
+	if (playerStatePoint >= playerStatePoints.size()) {
+		playerStatePoint = 0;
+		shaker.Shake();
+	}
 
-		if (playerState <= 0.5) {
-			const auto remap = playerState * 2.0f;
-			const auto remapInv = (1.0f - remap);
+	playerState = playerStatePoints[playerStatePoint];
+	playerStateInv = 1.0f - playerState;
 
-			playerAngleState = remapInv * playerAngleStates[0] +
-				remap * playerAngleStates[1];
-			playerForceState = remapInv * playerForceStates[0] +
-				remap * playerForceStates[1];
-			playerGravityState = remapInv * playerGravityStates[0] +
-				remap * playerGravityStates[1];
-		}
-		else {
-			const auto remap = (playerState - 0.5f) * 2.0f;
-			const auto remapInv = (1.0f - remap);
+	if (playerState <= 0.5) {
+		const auto remap = playerState * 2.0f;
+		const auto remapInv = (1.0f - remap);
 
-			playerAngleState = remapInv * playerAngleStates[1] +
-				remap * playerAngleStates[2];
-			playerForceState = remapInv * playerForceStates[1] +
-				remap * playerForceStates[2];
-			playerGravityState = remapInv * playerGravityStates[1] +
-				remap * playerGravityStates[2];
-		}
+		playerAngleState = remapInv * playerAngleStates[0] +
+			remap * playerAngleStates[1];
+		playerForceState = remapInv * playerForceStates[0] +
+			remap * playerForceStates[1];
+		playerGravityState = remapInv * playerGravityStates[0] +
+			remap * playerGravityStates[1];
+	}
+	else {
+		const auto remap = (playerState - 0.5f) * 2.0f;
+		const auto remapInv = (1.0f - remap);
+
+		playerAngleState = remapInv * playerAngleStates[1] +
+			remap * playerAngleStates[2];
+		playerForceState = remapInv * playerForceStates[1] +
+			remap * playerForceStates[2];
+		playerGravityState = remapInv * playerGravityStates[1] +
+			remap * playerGravityStates[2];
 	}
 }
 
