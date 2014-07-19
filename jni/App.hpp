@@ -74,6 +74,8 @@ private:
     float playerState = 0.0f;
     float playerStateInv = 1.0f;
 
+    int playerStatePoint = 0;
+
     float playerGravityState = -9.8f;
     float playerAngleState = 0.0f;
     float playerForceState = 0.0f;
@@ -89,18 +91,11 @@ private:
     static constexpr const auto playerStatesCount = 3;
     static constexpr const auto playerFluidSize = 0.5f;
 
-    const std::vector<float> playerGravityStates {
-        -9.8, -9.8, 5.0,
-    };
+    const std::vector<float> playerGravityStates { -12.8, -9.8, 1.0 };
+    const std::vector<float> playerAngleStates { 0.0, -300, -600 };
+    const std::vector<float> playerForceStates { 1.0, 0.0, 0.05 };
 
-    const std::vector<float> playerAngleStates {
-        // 0, -600 * 0.5, -600 * 1.0,
-        0,-300, -600,
-    };
-
-    const std::vector<float> playerForceStates {
-        1, 0.0, 0.1,
-    };
+    const std::vector<float> playerStatePoints { 0.0, 0.493519, 1.0 };
 };
 
 }

@@ -158,9 +158,17 @@ void App::Touch(int player, float newX, float newY) {
 	auto y = (1.0f - newY / screenHeight) * fieldHeight;
 
 	progress.Touch(newX, newY);
+}
 
+void App::TouchEnd(int player, float newX, float newY) {
 	if (!progress.IsPaused()) {
-		playerState = std::min(std::max(y / fieldHeight, 0.0f), 1.0f);
+		playerStatePoint++;
+		if (playerStatePoint >= playerStatePoints.size()) {
+			playerStatePoint = 0;
+			shaker.Shake();
+		}
+
+		playerState = playerStatePoints[playerStatePoint];
 		playerStateInv = 1.0f - playerState;
 
 		if (playerState <= 0.5) {
@@ -186,9 +194,6 @@ void App::Touch(int player, float newX, float newY) {
 				remap * playerGravityStates[2];
 		}
 	}
-}
-
-void App::TouchEnd(int player, float newX, float newY) {
 }
 
 void App::ScreenSize(float newWidth, float newHeight) {
