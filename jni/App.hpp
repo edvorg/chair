@@ -71,7 +71,7 @@ private:
 
     static constexpr const auto playerBodyRestitution = 0.25f;
     static constexpr const auto playerEyeRestitution = 0.5f;
-    static constexpr const auto borderRestitution = 0.1f;
+    static constexpr const auto borderRestitution = 0.2f;
 
     static constexpr const auto playerBodyCategory = 1;
     static constexpr const auto playerEyeCategory = 2;
@@ -116,11 +116,15 @@ private:
 	std::vector<b2Body*> playerBodies;
     std::vector<std::shared_ptr<b2Shape>> playerBodiesShapes;
 
+    b2Vec2 playerBodiesPointsMiddle;
+
     std::vector<b2Vec2> playerEyesBodiesPoints;
     std::vector<b2Body*> playerEyesBodies;
     std::vector<std::shared_ptr<b2Shape>> playerEyesBodiesShapes;
 
     /// borders
+
+    float borderVelocity = -30.0f;
 
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;

@@ -75,16 +75,16 @@ App::App() :
 	}
 
 	borderBodies[0]->SetTransform({ 100, 0 }, 0);
-	borderBodies[0]->SetLinearVelocity({ -10, 0 });
+	borderBodies[0]->SetLinearVelocity({ borderVelocity, 0 });
 
 	borderBodies[1]->SetTransform({ 100, 55 }, 0);
-	borderBodies[1]->SetLinearVelocity({ -10, 0 });
+	borderBodies[1]->SetLinearVelocity({ borderVelocity, 0 });
 
 	borderBodies[2]->SetTransform({ 300, 0 }, 0);
-	borderBodies[2]->SetLinearVelocity({ -10, 0 });
+	borderBodies[2]->SetLinearVelocity({ borderVelocity, 0 });
 
 	borderBodies[3]->SetTransform({ 300, 55 }, 0);
-	borderBodies[3]->SetLinearVelocity({ -10, 0 });
+	borderBodies[3]->SetLinearVelocity({ borderVelocity, 0 });
 
 	for (auto i = 0; i < playerBodiesCount; ++i) {
 		const auto shape = new b2PolygonShape;
@@ -113,8 +113,8 @@ App::App() :
 	}
 
 	for (auto i = 0; i < playerEyesCount; ++i) {
-		const auto shape = new b2PolygonShape;
-		shape->SetAsBox(playerEyeSize, playerEyeSize);
+		const auto shape = new b2CircleShape;
+		shape->m_radius = playerEyeSize;
 
 		b2BodyDef bdef;
 
@@ -162,8 +162,14 @@ void App::Update(double dt) {
 
 		// convex points
 
-		for (auto i = 0; i < playerBodies.size(); i++)
+		playerBodiesPointsMiddle = { 0.0f, 0.0f };
+
+		for (auto i = 0; i < playerBodies.size(); i++) {
 			playerBodiesPoints[i] = playerBodies[i]->GetPosition();
+			playerBodiesPointsMiddle += playerBodiesPoints[i];
+		}
+
+		playerBodiesPointsMiddle = (1.0f / playerBodies.size()) * playerBodiesPointsMiddle;
 
 		for (auto i = 0; i < playerEyesBodies.size(); i++)
 			playerEyesBodiesPoints[i] = playerEyesBodies[i]->GetPosition();
@@ -174,7 +180,7 @@ void App::Update(double dt) {
 			b1->SetAngularVelocity(dt * playerAngleState);
 
 			for (auto& b2 : playerBodies) {
-				b2Vec2 dir = b1->GetPosition() - b2->GetPosition();
+				const auto dir = b1->GetPosition() - b2->GetPosition();
 				b2->ApplyForceToCenter(playerForceState * dir, true);
 			}
 		}
@@ -189,7 +195,7 @@ void App::Update(double dt) {
 
 		for (auto& e : playerEyesBodies) {
 			for (auto& b : playerBodies) {
-				b2Vec2 dir = b->GetPosition() - e->GetPosition();
+				const auto dir = b->GetPosition() - e->GetPosition();
 				e->ApplyForceToCenter(playerEyeBodyForceState * dir, true);
 			}
 		}
@@ -200,6 +206,13 @@ void App::Update(double dt) {
 			if (b->GetPosition().x < - 200) {
 				b->SetTransform({ 200, b->GetPosition().y }, b->GetAngle());
 			}
+		}
+
+		// forwarding
+
+		for (auto& b : playerBodies) {
+			const auto dir = b2Vec2 { 100.0f - playerBodiesPointsMiddle.x, 0.0f };
+			b->ApplyLinearImpulse(0.0001f * dir, { 0, 0 }, true);
 		}
 	}
 }
