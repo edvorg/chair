@@ -28,6 +28,8 @@
 #include <GLES/gl.h>
 #include <math.h>
 #include <algorithm>
+#include <android/log.h>
+#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
 
 #include "LevelProgress.hpp"
 
@@ -43,6 +45,148 @@ namespace test {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrthof(0, fieldWidth, 0, fieldHeight, 1, -1);
+  }
+
+  bool isToTheLeftFromLine(b2Vec2 A, b2Vec2 B, b2Vec2 C) {
+	  bool answer = ((B.x - A.x)*(C.y - A.y) - (B.y - A.y)*(C.x - A.x)) > 0;
+	  return answer;
+  }
+
+  float distanceToTheLine(b2Vec2 A, b2Vec2 B, b2Vec2 C) {
+	  float denom = sqrt((B.x-A.x)*(B.x-A.x)+(B.y-A.y)*(B.y-A.y));
+	  if (!denom) return 0;
+	  float D1 = B.x-A.x;
+	  float D2 = B.y-A.y;
+	  float top = fabs(D2*C.x-D1*C.y-A.x*B.y+B.x*A.y);
+	  if (!top) return 0;
+	  float bottom = sqrt(D1*D1+D2*D2);
+	  return 10*top/bottom;
+  }
+  std::vector<b2Vec2> subHull(b2Vec2 A, b2Vec2 B, std::vector<b2Vec2> vertices) {
+  	  std::vector<b2Vec2> answer;
+
+  	  float maxDistance = 100;
+  	  float* distances = new float[vertices.size()];
+  	  if (vertices.empty()) return answer;
+  	  float max = 0;
+  	  auto maxIterator = vertices.begin();
+  	  int i=0;
+  	  for (auto vertex = vertices.begin(); vertex!=vertices.end(); vertex++) {
+  		  float dist = distanceToTheLine(A,B,*vertex);
+  		  distances[i] = dist/maxDistance;
+  		  if (dist>max) {
+  			  max = dist;
+  			  maxIterator = vertex;
+  		  }
+  		  i++;
+  	  }
+
+  	  std::vector<b2Vec2> set1;
+  	  std::vector<b2Vec2> set2;
+
+  	  for (auto vertex = vertices.begin(); vertex!=vertices.end(); vertex++) {
+  		  if (vertex != maxIterator) {
+  			  if (isToTheLeftFromLine(A, *maxIterator, *vertex)) {
+  				  set1.push_back(*vertex);
+  			  } else if (isToTheLeftFromLine(*maxIterator, B, *vertex)) {
+  				  set2.push_back(*vertex);
+  			  }
+  		  }
+  	  }
+
+  	  set1 = subHull(A, *maxIterator, set1);
+  	  set2 = subHull(*maxIterator, B, set2);
+
+  	  answer.insert(answer.end(), set1.begin(), set1.end());
+  	  answer.push_back(*maxIterator);
+  	  answer.insert(answer.end(), set2.begin(), set2.end());
+  	  //drawPointsColored(vertices.data(), vertices.size(), distances, 1);
+  	  delete[] distances;
+  	  return answer;
+  }
+
+  std::vector<b2Vec2> quickHull(std::vector<b2Vec2> vertices) {
+	  //find left and right
+	  std::vector<b2Vec2> answer;
+
+	  if (vertices.size()>0) {
+		  float min = (*vertices.begin()).x;
+		  float max = (*vertices.begin()).x;
+		  auto minIterator = vertices.begin();
+		  auto maxIterator = vertices.begin();
+		  for (auto vertex = vertices.begin(); vertex!=vertices.end(); vertex++) {
+			  if ((*vertex).x<min) {
+				  min = (*vertex).x;
+				  minIterator = vertex;
+			  } else if ((*vertex).x>max) {
+				  max = (*vertex).x;
+				  maxIterator = vertex;
+			  }
+		  }
+		  answer.push_back(*minIterator);
+
+		  //LOGW("MIN: %d, %d", (int)(*minIterator).x, (int)(*minIterator).y);
+		  //LOGW("MAX: %d, %d", (int)(*maxIterator).x, (int)(*maxIterator).y);
+		  std::vector<b2Vec2> set1;
+		  std::vector<b2Vec2> set2;
+		  for (auto vertex = vertices.begin(); vertex!=vertices.end(); vertex++) {
+			  if ((vertex != minIterator) && (vertex != maxIterator)) {
+				  if (isToTheLeftFromLine(*minIterator, *maxIterator, *vertex))
+					  set1.push_back(*vertex);
+				  else
+					  set2.push_back(*vertex);
+			  }
+		  }
+
+		  set1 = subHull(*minIterator, *maxIterator, set1);  //order?
+		  set2 = subHull(*maxIterator, *minIterator, set2);
+
+		  /*b2Color color1(0,0.5,0);
+		  drawPoly(set1.data(), set1.size(), color1);
+		  //answer.insert();
+		  color1.Set(0,0,0.7);
+		  drawPoly(set2.data(), set2.size(), color1);*/
+
+		  answer.insert(answer.end(), set1.begin(), set1.end());
+
+		  if (minIterator != maxIterator)
+		      answer.push_back(*maxIterator);
+
+		  answer.insert(answer.end(), set2.begin(), set2.end());
+
+	  }
+
+	  return answer;
+  }
+
+  void drawEllipse(b2Vec2 center, float radius, b2Color color, int numPoints) {
+	  b2Vec2* points = new b2Vec2[numPoints];
+	  for (int i=0 ;i<numPoints; i++) {
+		  points[i].Set(center.x + radius * cos(2*M_PI*i/numPoints), center.y + radius * sin(2*M_PI*i/numPoints));
+	  }
+
+	  glColor4f(color.r, color.g, color.b, 1);
+
+	  glEnableClientState(GL_VERTEX_ARRAY);
+	  glVertexPointer(2, GL_FLOAT, 0, points);
+	  glDrawArrays(GL_TRIANGLE_FAN, 0, numPoints);
+
+	  glDisableClientState(GL_VERTEX_ARRAY);
+
+	  delete[] points;
+  }
+
+  void drawPointsColored(const b2Vec2* points, int32 vertexCount, float* color, float radius, int numPoints) {
+	  for (int i=0; i<vertexCount; i++) {
+		  b2Color color2B(0, color[i], 0);
+		  drawEllipse(points[i], radius, color2B, numPoints);
+	  }
+  }
+
+  void drawPoints(const b2Vec2* points, int32 vertexCount, b2Color color, float radius, int numPoints) {
+	  for (int i=0; i<vertexCount; i++) {
+		  drawEllipse(points[i], radius, color, numPoints);
+	  }
   }
 
   void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color) {

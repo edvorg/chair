@@ -152,6 +152,7 @@ void App::Init() {
 }
 
 void App::Update(double dt) {
+	//dt*=0.1;
 	progress.Update(dt);
 	shaker.Update(dt);
 
@@ -210,7 +211,7 @@ void App::Draw() {
 	if (!progress.IsPaused()) {
 		shaker.ApplyMatrix();
 
-		world.DrawDebugData();
+		//world.DrawDebugData();
 
 		DrawNumber(false,
 				   fieldWidth - 5.0f,
@@ -221,7 +222,20 @@ void App::Draw() {
 	}
 
 	SetTranslate(0, 0);
-	progress.Draw();
+	//progress.Draw();
+
+	//b2Vec2* vertices = playerPoints.data();
+	b2Color color(0.7,0.7,0.7);
+	//drawPoly(vertices, playerPoints.size(),color);
+
+	std::vector<b2Vec2> Outer= quickHull(playerBodiesPoints);
+	color.Set(0,0,0.8);
+	//drawPoints(LeftRight.data(), LeftRight.size(),color);
+	drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
+	color.Set(0.7,0,0);
+	drawPoints(Outer.data(), Outer.size(),color, 1);
+	//drawPoly(Outer.data(), Outer.size(),color);
+
 }
 
 void App::Release() {
