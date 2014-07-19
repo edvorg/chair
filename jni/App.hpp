@@ -64,9 +64,11 @@ private:
     static constexpr const auto playerEyeSize = 0.6f;
     static constexpr const auto playerBodyDencity = 1.0f;
     static constexpr const auto playerEyeDencity = 0.25f;
+
     static constexpr const auto playerBodyFriction = 0.5f;
     static constexpr const auto playerEyeFriction = 0.5f;
-    static constexpr const auto borderFriction = 0.75f;
+    static constexpr const auto borderFriction = 0.1f;
+
     static constexpr const auto playerBodyRestitution = 0.25f;
     static constexpr const auto playerEyeRestitution = 0.5f;
     static constexpr const auto borderRestitution = 0.1f;

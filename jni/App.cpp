@@ -51,7 +51,7 @@ App::App() :
 
 	for (auto i = 0; i < 4; ++i) {
 		const auto shape = new b2PolygonShape;
-		shape->SetAsBox(150, 5);
+		shape->SetAsBox(100, 5);
 
 		b2BodyDef bdef;
 
@@ -74,10 +74,17 @@ App::App() :
 		borderBodies[i] = body;
 	}
 
-	borderBodies[0]->SetTransform({ 50, 0 }, 0);
-	borderBodies[1]->SetTransform({ 350, 0 }, 0);
-	borderBodies[2]->SetTransform({ 50, 55 }, 0);
-	borderBodies[3]->SetTransform({ 350, 55 }, 0);
+	borderBodies[0]->SetTransform({ 100, 0 }, 0);
+	borderBodies[0]->SetLinearVelocity({ -10, 0 });
+
+	borderBodies[1]->SetTransform({ 100, 55 }, 0);
+	borderBodies[1]->SetLinearVelocity({ -10, 0 });
+
+	borderBodies[2]->SetTransform({ 300, 0 }, 0);
+	borderBodies[2]->SetLinearVelocity({ -10, 0 });
+
+	borderBodies[3]->SetTransform({ 300, 55 }, 0);
+	borderBodies[3]->SetLinearVelocity({ -10, 0 });
 
 	for (auto i = 0; i < playerBodiesCount; ++i) {
 		const auto shape = new b2PolygonShape;
@@ -184,6 +191,14 @@ void App::Update(double dt) {
 			for (auto& b : playerBodies) {
 				b2Vec2 dir = b->GetPosition() - e->GetPosition();
 				e->ApplyForceToCenter(playerEyeBodyForceState * dir, true);
+			}
+		}
+
+		// borders respawn
+
+		for (auto& b : borderBodies) {
+			if (b->GetPosition().x < - 200) {
+				b->SetTransform({ 200, b->GetPosition().y }, b->GetAngle());
 			}
 		}
 	}
