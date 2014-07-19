@@ -33,7 +33,7 @@ namespace test {
   class LevelProgress;
 
   // apply translation matrix
-  void SetTranslate(float x, float y);
+void SetTranslate(float x, float y, bool override = true);
   // set ortho projection
   void SetProjection(float fieldWidth, float fieldHeight);
   void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number);

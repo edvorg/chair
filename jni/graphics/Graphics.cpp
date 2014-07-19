@@ -34,9 +34,9 @@
 
 namespace test {
 
-  void SetTranslate(float x, float y) {
+void SetTranslate(float x, float y, bool override) {
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	if (override) glLoadIdentity();
 	glTranslatef(x, y, 0);
   }
 

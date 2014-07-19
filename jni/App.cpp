@@ -51,7 +51,7 @@ App::App() :
 
 	for (auto i = 0; i < 4; ++i) {
 		const auto shape = new b2PolygonShape;
-		shape->SetAsBox(100, 5);
+		shape->SetAsBox(45, 5);
 
 		b2BodyDef bdef;
 
@@ -73,18 +73,6 @@ App::App() :
 		borderShapes[i].reset(shape);
 		borderBodies[i] = body;
 	}
-
-	borderBodies[0]->SetTransform({ 100, 0 }, 0);
-	borderBodies[0]->SetLinearVelocity({ borderVelocity, 0 });
-
-	borderBodies[1]->SetTransform({ 100, 55 }, 0);
-	borderBodies[1]->SetLinearVelocity({ borderVelocity, 0 });
-
-	borderBodies[2]->SetTransform({ 300, 0 }, 0);
-	borderBodies[2]->SetLinearVelocity({ borderVelocity, 0 });
-
-	borderBodies[3]->SetTransform({ 300, 55 }, 0);
-	borderBodies[3]->SetLinearVelocity({ borderVelocity, 0 });
 
 	for (auto i = 0; i < playerBodiesCount; ++i) {
 		const auto shape = new b2PolygonShape;
@@ -158,7 +146,7 @@ void App::Update(double dt) {
 	if (!progress.IsPaused()) {
 		world.Step(dt, 1, 2);
 
-		world.SetGravity({ 0, playerGravityState });
+		world.SetGravity({ 5, playerGravityState });
 
 		// convex points
 
@@ -208,27 +196,30 @@ void App::Update(double dt) {
 			}
 		}
 
-		// forwarding
+		// back respawn
 
-		for (auto& b : playerBodies) {
-			const auto dir = b2Vec2 { 100.0f - playerBodiesPointsMiddle.x, 0.0f };
-			b->ApplyLinearImpulse(0.0001f * dir, { 0, 0 }, true);
-		}
+		borderBodies[0]->SetTransform(
+			{ (((int)playerBodiesPointsMiddle.x) / 100) * 100.0f,     0 }, 0);
+		borderBodies[1]->SetTransform(
+			{ (((int)playerBodiesPointsMiddle.x) / 100) * 100.0f,     55 }, 0);
+		borderBodies[2]->SetTransform(
+			{ (((int)playerBodiesPointsMiddle.x) / 100) * 100.0f + 100.0f, 0 }, 0);
+		borderBodies[3]->SetTransform(
+			{ (((int)playerBodiesPointsMiddle.x) / 100) * 100.0f + 100.0f, 55 }, 0);
 	}
 }
 
 void App::Draw() {
 	SetProjection(fieldWidth, fieldHeight);
 
-	if (progress.IsPaused()) {
-		progress.Draw();
-	}
-	else {
+	SetTranslate(0, 0);
+	progress.Draw();
+
+	if (!progress.IsPaused()) {
+		SetTranslate(50 - playerBodiesPointsMiddle.x, 0);
 		shaker.ApplyMatrix();
 
 		world.DrawDebugData();
-
-		SetTranslate(0, 0);
 
 		//b2Vec2* vertices = playerPoints.data();
 		b2Color color(0.7,0.7,0.7);
@@ -241,6 +232,9 @@ void App::Draw() {
 		color.Set(0.7,0,0);
 		drawPoints(Outer.data(), Outer.size(),color, 1);
 		//drawPoly(Outer.data(), Outer.size(),color);
+
+		SetTranslate(0, 0);
+		shaker.ApplyMatrix();
 
 		DrawNumber(false,
 				   fieldWidth - 5.0f,
