@@ -61,11 +61,25 @@ private:
     static constexpr const auto playerEyesCount = 2;
     static constexpr const auto playerStatesCount = 3;
     static constexpr const auto playerBodySize = 0.5f;
-    static constexpr const auto playerEyeSize = 0.75f;
+    static constexpr const auto playerEyeSize = 0.6f;
+    static constexpr const auto playerBodyDencity = 1.0f;
+    static constexpr const auto playerEyeDencity = 0.25f;
+    static constexpr const auto playerBodyFriction = 0.5f;
+    static constexpr const auto playerEyeFriction = 0.5f;
+    static constexpr const auto borderFriction = 0.75f;
+    static constexpr const auto playerBodyRestitution = 0.25f;
+    static constexpr const auto playerEyeRestitution = 0.5f;
+    static constexpr const auto borderRestitution = 0.1f;
+
+    static constexpr const auto playerBodyCategory = 1;
+    static constexpr const auto playerEyeCategory = 2;
+    static constexpr const auto borderCategory = 4;
 
     const std::vector<float> playerGravityStates { -12.8, -9.8, 1.0 };
     const std::vector<float> playerAngleStates { 0.0, -300, -700 };
     const std::vector<float> playerForceStates { 1.25, 0.0, 0.05 };
+    const std::vector<float> playerEyeBodyForceStates { 1.0, 1.0, 0.0 };
+    const std::vector<float> playerEyeAntigravStates { 0.0, 0.0, -4.0f };
 
     const std::vector<float> playerStatePoints { 0.0, 0.493519, 1.0 };
 
@@ -87,13 +101,14 @@ private:
     /// player
 
     float playerState = 0.0f;
-    float playerStateInv = 1.0f - playerState;
 
     int playerStatePoint = 0;
 
     float playerGravityState = playerGravityStates[playerStatePoint];
     float playerAngleState = playerAngleStates[playerStatePoint];
     float playerForceState = playerForceStates[playerStatePoint];
+    float playerEyeBodyForceState = playerEyeBodyForceStates[playerStatePoint];
+    float playerEyeAntigravState = playerEyeAntigravStates[playerStatePoint];
 
 	std::vector<b2Vec2> playerBodiesPoints;
 	std::vector<b2Body*> playerBodies;
@@ -114,6 +129,8 @@ private:
         { playerGravityStates.data(), playerGravityState },
         { playerAngleStates.data(), playerAngleState },
         { playerForceStates.data(), playerForceState },
+        { playerEyeBodyForceStates.data(), playerEyeBodyForceState },
+        { playerEyeAntigravStates.data(), playerEyeAntigravState },
     };
 };
 

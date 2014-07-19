@@ -64,6 +64,9 @@ App::App() :
 
 		b2FixtureDef fdef;
 		fdef.shape = shape;
+		fdef.friction = borderFriction;
+		fdef.restitution = borderRestitution;
+		fdef.filter.categoryBits = borderCategory;
 
 		const auto fixt = body->CreateFixture(&fdef);
 
@@ -90,7 +93,10 @@ App::App() :
 
 		b2FixtureDef fdef;
 		fdef.shape = shape;
-		fdef.density = 1.0;
+		fdef.density = playerBodyDencity;
+		fdef.friction = playerBodyFriction;
+		fdef.restitution = playerBodyRestitution;
+		fdef.filter.categoryBits = playerBodyCategory;
 
 		const auto fixt = body->CreateFixture(&fdef);
 
@@ -113,7 +119,10 @@ App::App() :
 
 		b2FixtureDef fdef;
 		fdef.shape = shape;
-		fdef.density = 1.0;
+		fdef.density = playerEyeDencity;
+		fdef.friction = playerEyeFriction;
+		fdef.restitution = playerEyeRestitution;
+		fdef.filter.categoryBits = playerEyeCategory;
 
 		const auto fixt = body->CreateFixture(&fdef);
 
@@ -144,11 +153,15 @@ void App::Update(double dt) {
 
 		world.SetGravity({ 0, playerGravityState });
 
+		// convex points
+
 		for (auto i = 0; i < playerBodies.size(); i++)
 			playerBodiesPoints[i] = playerBodies[i]->GetPosition();
 
 		for (auto i = 0; i < playerEyesBodies.size(); i++)
 			playerEyesBodiesPoints[i] = playerEyesBodies[i]->GetPosition();
+
+		// body <-> body
 
 		for (auto& b1 : playerBodies) {
 			b1->SetAngularVelocity(dt * playerAngleState);
@@ -156,6 +169,21 @@ void App::Update(double dt) {
 			for (auto& b2 : playerBodies) {
 				b2Vec2 dir = b1->GetPosition() - b2->GetPosition();
 				b2->ApplyForceToCenter(playerForceState * dir, true);
+			}
+		}
+
+		// eyes antigrav
+
+		for (auto& e : playerEyesBodies) {
+			e->ApplyForceToCenter({ 0.0, playerEyeAntigravState }, true);
+		}
+
+		// body <-> eye
+
+		for (auto& e : playerEyesBodies) {
+			for (auto& b : playerBodies) {
+				b2Vec2 dir = b->GetPosition() - e->GetPosition();
+				e->ApplyForceToCenter(playerEyeBodyForceState * dir, true);
 			}
 		}
 	}
@@ -201,8 +229,26 @@ void App::TouchEnd(int player, float newX, float newY) {
 		shaker.Shake();
 	}
 
+	// drop eyes
+
+	if  (playerStatePoint == 2) {
+		for (auto& e : playerEyesBodies) {
+			b2Filter f = e->GetFixtureList()->GetFilterData();
+			f.maskBits = borderCategory | playerEyeCategory;
+			e->GetFixtureList()->SetFilterData(f);
+		}
+	}
+	else {
+		for (auto& e : playerEyesBodies) {
+			b2Filter f = e->GetFixtureList()->GetFilterData();
+			f.maskBits = borderCategory | playerBodyCategory | playerEyeCategory;
+			e->GetFixtureList()->SetFilterData(f);
+		}
+	}
+
+	// handle balancer
+
 	playerState = playerStatePoints[playerStatePoint];
-	playerStateInv = 1.0f - playerState;
 
 	if (playerState <= 0.5) {
 		const auto remap = playerState * 2.0f;
