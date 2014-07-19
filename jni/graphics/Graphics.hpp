@@ -39,7 +39,11 @@ namespace test {
   void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number);
   void DrawDigit(float x, float y, float sizex, float sizey, unsigned int digit);
 
+  void drawEllipse(b2Vec2 center, float radius, b2Color color, int numPoints = 6);
+  void drawPoints(const b2Vec2* points, int32 vertexCount, b2Color color, float radius, int numPoints = 6);
+  void drawPointsColored(const b2Vec2* points, int32 vertexCount, float* color, float radius, int numPoints = 6);
   void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color);
+  std::vector<b2Vec2> quickHull(std::vector<b2Vec2> vertices);
   //void DrawPlayer(const Player & player);
   //void DrawObstacle(const Asteroid & asteroid);
   //void DrawDecorateStar(const DecorateStar & star);
