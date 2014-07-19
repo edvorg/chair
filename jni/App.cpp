@@ -206,25 +206,11 @@ void App::TouchEnd(int player, float newX, float newY) {
 
 	if (playerState <= 0.5) {
 		const auto remap = playerState * 2.0f;
-		const auto remapInv = (1.0f - remap);
-
-		playerAngleState = remapInv * playerAngleStates[0] +
-			remap * playerAngleStates[1];
-		playerForceState = remapInv * playerForceStates[0] +
-			remap * playerForceStates[1];
-		playerGravityState = remapInv * playerGravityStates[0] +
-			remap * playerGravityStates[1];
+		for (auto& p : balancer) p.second = (1.0f - remap) * p.first[0] + remap * p.first[1];
 	}
 	else {
 		const auto remap = (playerState - 0.5f) * 2.0f;
-		const auto remapInv = (1.0f - remap);
-
-		playerAngleState = remapInv * playerAngleStates[1] +
-			remap * playerAngleStates[2];
-		playerForceState = remapInv * playerForceStates[1] +
-			remap * playerForceStates[2];
-		playerGravityState = remapInv * playerGravityStates[1] +
-			remap * playerGravityStates[2];
+		for (auto& p : balancer) p.second = (1.0f - remap) * p.first[1] + remap * p.first[2];
 	}
 }
 

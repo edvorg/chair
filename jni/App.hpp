@@ -87,7 +87,7 @@ private:
     /// player
 
     float playerState = 0.0f;
-    float playerStateInv = 1.0f;
+    float playerStateInv = 1.0f - playerState;
 
     int playerStatePoint = 0;
 
@@ -107,6 +107,14 @@ private:
 
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
+
+    /// balancer
+
+    const std::vector<std::pair<const float*, float&>> balancer {
+        { playerGravityStates.data(), playerGravityState },
+        { playerAngleStates.data(), playerAngleState },
+        { playerForceStates.data(), playerForceState },
+    };
 };
 
 }
