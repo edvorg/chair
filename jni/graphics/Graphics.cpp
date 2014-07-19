@@ -28,8 +28,7 @@
 #include <GLES/gl.h>
 #include <math.h>
 #include <algorithm>
-#include <android/log.h>
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
+#include <log.h>
 
 #include "LevelProgress.hpp"
 

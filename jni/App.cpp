@@ -152,7 +152,6 @@ void App::Init() {
 }
 
 void App::Update(double dt) {
-	//dt*=0.1;
 	progress.Update(dt);
 	shaker.Update(dt);
 
@@ -208,10 +207,27 @@ void App::Update(double dt) {
 void App::Draw() {
 	SetProjection(fieldWidth, fieldHeight);
 
-	if (!progress.IsPaused()) {
+	if (progress.IsPaused()) {
+		progress.Draw();
+	}
+	else {
 		shaker.ApplyMatrix();
 
-		//world.DrawDebugData();
+		world.DrawDebugData();
+
+		SetTranslate(0, 0);
+
+		//b2Vec2* vertices = playerPoints.data();
+		b2Color color(0.7,0.7,0.7);
+		//drawPoly(vertices, playerPoints.size(),color);
+
+		std::vector<b2Vec2> Outer= quickHull(playerBodiesPoints);
+		color.Set(0,0,0.8);
+		//drawPoints(LeftRight.data(), LeftRight.size(),color);
+		drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
+		color.Set(0.7,0,0);
+		drawPoints(Outer.data(), Outer.size(),color, 1);
+		//drawPoly(Outer.data(), Outer.size(),color);
 
 		DrawNumber(false,
 				   fieldWidth - 5.0f,
@@ -220,22 +236,6 @@ void App::Draw() {
 				   1.5,
 				   progress.GetLevel());
 	}
-
-	SetTranslate(0, 0);
-	//progress.Draw();
-
-	//b2Vec2* vertices = playerPoints.data();
-	b2Color color(0.7,0.7,0.7);
-	//drawPoly(vertices, playerPoints.size(),color);
-
-	std::vector<b2Vec2> Outer= quickHull(playerBodiesPoints);
-	color.Set(0,0,0.8);
-	//drawPoints(LeftRight.data(), LeftRight.size(),color);
-	drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
-	color.Set(0.7,0,0);
-	drawPoints(Outer.data(), Outer.size(),color, 1);
-	//drawPoly(Outer.data(), Outer.size(),color);
-
 }
 
 void App::Release() {
