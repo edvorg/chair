@@ -78,7 +78,7 @@ private:
     static constexpr const auto borderCategory = 4;
 
     //{ solid liquid gas }
-    const std::vector<float> playerGravityStates { -18.8, -9.8, 2.0 };
+    const std::vector<float> playerGravityStates { -18.8, -9.8, 4.0 };
     const std::vector<float> playerAngleStates { 0.0, -300, -800 };
     const std::vector<float> playerForceStates { 3.25, 0.0, 0.05 };
     const std::vector<float> playerEyeBodyForceStates { 1.0, 1.0, 0.0 };
@@ -138,6 +138,9 @@ private:
 
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
+
+    b2Vec2 holeTop;
+    b2Vec2 holeBottom;
 
     /// balancer
 

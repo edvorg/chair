@@ -257,8 +257,11 @@ void App::Update(double dt) {
 
 		// back respawn
 
-		const auto hole1 = rand() % 2 ? 25 : 0;
-		const auto hole2 = rand() % 2 ? 25 : 0;
+		const auto holeChoice = rand() % 3;
+		const auto doHole1 = holeChoice == 1;
+		const auto doHole2 = holeChoice == 2;
+		const auto hole1 = doHole1 ? 15 : 0;
+		const auto hole2 = doHole2 ? 15 : 0;
 
 		if (borderBodies[0]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0) {
 			borderBodies[0]->SetTransform(
@@ -272,6 +275,14 @@ void App::Update(double dt) {
 				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole1, 5 }, 0);
 			borderBodies[3]->SetTransform(
 				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole2, 50 }, 0);
+
+			if (doHole1) {
+				holeBottom = { (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 125.0f + hole1 * 0.5f, 5.0f };
+			}
+
+			if (doHole2) {
+				holeTop = { (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 125.0f + hole2 * 0.5f, 45.0f };
+			}
 		}
 
 		const auto choice = rand() % 2;
@@ -288,6 +299,26 @@ void App::Update(double dt) {
 			}
 		}
 
+		// fall out in holes
+
+		for (auto& b : playerBodies) {
+			// b->ApplyForce({ 0.0f, - 10.0f }, { 0.0f, 0.0f }, true);
+			if (playerStatePoint == 1 &&
+				std::abs(b->GetPosition().x - holeBottom.x) < 2.5f  &&
+				std::abs(b->GetPosition().y - 5.0f) < 10.0f) {
+				b->SetLinearVelocity({ 0.0f, - 30.0f });
+
+			} else if (playerStatePoint == 2 &&
+					   std::abs(b->GetPosition().x - holeTop.x) < 2.5f) {
+				b->SetLinearVelocity({ 0.0f, 40.0f });
+			} else {
+				const auto vel = b->GetLinearVelocity();
+				b->SetLinearVelocity({ 40.0f, vel.y });
+			}
+		}
+
+		// particles respawn
+
 		for (auto& b1 : playerBodies) {
 			if ((playerBodiesPointsMiddle - b1->GetPosition()).Length() > 20.0) {
 				b1->SetTransform(
@@ -295,11 +326,6 @@ void App::Update(double dt) {
 					b1->GetAngle());
 				b1->SetLinearVelocity(playerVelocityMiddle);
 			}
-		}
-
-		for (auto& b1 : playerBodies) {
-			const auto vel = b1->GetLinearVelocity();
-			b1->SetLinearVelocity({ 40.0f, vel.y });
 		}
 
 		// handle balancer
