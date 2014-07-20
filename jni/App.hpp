@@ -83,9 +83,9 @@ private:
     const std::vector<float> playerForceStates { 3.25, 0.0, 0.05 };
     const std::vector<float> playerEyeBodyForceStates { 1.0, 1.0, 0.0 };
     const std::vector<float> playerEyeAntigravStates { 0.0, 0.0, -4.0f };
-    const std::vector<float> playerColorR { 0.5, 0.0, 0.7 };
-    const std::vector<float> playerColorG { 0.5, 0.7, 0.7 };
-    const std::vector<float> playerColorB { 1.0, 1.0, 0.0 };
+    const std::vector<float> playerColorR { 0.7, 0.0, 0.6 };
+    const std::vector<float> playerColorG { 0.4, 0.7, 0.7 };
+    const std::vector<float> playerColorB { 0.4, 1.0, 0.3 };
 
     const std::vector<float> playerStatePoints { 0.0, 0.493519, 1.0 };
 
