@@ -343,6 +343,36 @@ void App::Update(double dt) {
 	}
 }
 
+/*void drawTexture(GLuint* textures) {
+	b2Vec2 points[] = {
+			{0,0},
+			{50,10},
+			{10,50},
+			{50,50}
+	};
+
+	b2Vec2 tex[] = {
+				{0,0},
+				{1,0},
+				{0,1},
+				{1,1}
+	};
+
+	glColor4f(0.5, 0.5, 0.5, 1);
+
+	glEnable(GL_TEXTURE_2D);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 0, points);
+	glTexCoordPointer(2, GL_FLOAT, 0, tex);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}*/
+
 void App::Draw() {
 	SetProjection(fieldWidth, fieldHeight);
 
@@ -355,6 +385,8 @@ void App::Draw() {
 
 	drawCreature(playerBodiesPoints, b2Color(playerColorRState, playerColorGState, playerColorBState), 1, playerStatePoint);
 	drawEyes(playerEyesBodiesPoints, playerBodiesPoints);
+
+	//drawTexture(textures);
 
 	world.DrawDebugData();
 
