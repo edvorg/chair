@@ -34,6 +34,9 @@
 #include <log.h>
 #include <vector>
 
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+
 namespace test {
 
 App::App() :
@@ -98,6 +101,7 @@ App::App() :
 		playerBodiesShapes[i].reset(shape);
 		playerBodies[i] = body;
 		playerBodiesPoints[i] = bdef.position;
+		playerBodiesFallen[body] = false;
 	}
 
 	for (auto i = 0; i < playerEyesCount; ++i) {
@@ -189,189 +193,312 @@ App::~App() {
 void App::Init() {
 }
 
+void App::ComputeCampPos(double dt) {
+	camPos = camPos + (playerBodiesPointsMiddle.x - camPos) * dt * 4.0;
+}
+
+void App::ComputePoints() {
+	playerBodiesPointsMiddle = { 0.0f, 0.0f };
+	playerVelocityMiddle = { 0.0f, 0.0f };
+	auto count = 0;
+
+	for (auto i = 0; i < playerBodies.size(); i++) {
+		playerBodiesPoints[i] = playerBodies[i]->GetPosition();
+
+		if (!playerBodiesFallen[playerBodies[i]])
+		{
+			playerBodiesPointsMiddle += playerBodiesPoints[i];
+			playerVelocityMiddle += playerBodies[i]->GetLinearVelocity();
+			count++;
+		}
+	}
+
+	playerBodiesPointsMiddle = (1.0f / count) * playerBodiesPointsMiddle;
+	playerVelocityMiddle = (1.0f / count) * playerVelocityMiddle;
+
+	// eye points
+
+	for (auto i = 0; i < playerEyesBodies.size(); i++)
+		playerEyesBodiesPoints[i] = playerEyesBodies[i]->GetPosition();
+}
+
+void App::BodyCrossBody(double dt) {
+	for (auto& b1 : playerBodies) {
+		if (!playerBodiesFallen[b1]) {
+			b1->SetAngularVelocity(dt * playerAngleState);
+
+			for (auto& b2 : playerBodies) {
+				if (!playerBodiesFallen[b2]) {
+					const auto dir = b1->GetPosition() - b2->GetPosition();
+					b2->ApplyForceToCenter(playerForceState * dir, true);
+				}
+			}
+		}
+	}
+}
+
+void App::BodyCrossEye() {
+	for (auto& e : playerEyesBodies) {
+		for (auto& b : playerBodies) {
+			if (!playerBodiesFallen[b]) {
+				const auto dir = b->GetPosition() - e->GetPosition();
+				e->ApplyForceToCenter(playerEyeBodyForceState * dir, true);
+			}
+		}
+	}
+}
+
+void App::EyesAntigrav() {
+	for (auto& e : playerEyesBodies) {
+		e->ApplyForceToCenter({ 0.0, playerEyeAntigravState }, true);
+	}
+}
+
+void App::RespawnBorders(bool force) {
+	const auto holeChoice = rand() % 3;
+	const auto doHole1 = holeChoice == 1;
+	const auto doHole2 = holeChoice == 2;
+	const auto hole1 = doHole1 ? 15 : 0;
+	const auto hole2 = doHole2 ? 15 : 0;
+
+	if (borderBodies[0]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0 || force) {
+		borderBodies[0]->SetTransform(
+			{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 25.0f,     5 }, 0);
+		borderBodies[1]->SetTransform(
+			{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 25.0f,     50 }, 0);
+	}
+
+	if (borderBodies[2]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0 || force) {
+		borderBodies[2]->SetTransform(
+			{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole1, 5 }, 0);
+		borderBodies[3]->SetTransform(
+			{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole2, 50 }, 0);
+
+		if (doHole1) {
+			holeBottom = { (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 125.0f + hole1 * 0.5f, 5.0f };
+		}
+
+		if (doHole2) {
+			holeTop = { (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 125.0f + hole2 * 0.5f, 45.0f };
+		}
+	}
+}
+
+void App::RespawnObstacles(bool force) {
+	const auto choice = rand() % 2;
+
+	if (bottomObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f &&
+		topObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f) {
+		if (choice == 0) {
+			bottomObstacle->SetTransform(
+				{ playerBodiesPointsMiddle.x + 75.0f, 10.0f }, bottomObstacle->GetAngle());
+		}
+		else if (choice == 1) {
+			topObstacle->SetTransform(
+				{ playerBodiesPointsMiddle.x + 75.0f, 45.0f }, topObstacle->GetAngle());
+		}
+	}
+}
+
+void App::FalloutHoles() {
+	for (auto& b : playerBodies) {
+		if (playerStatePoint == 1 &&
+			std::abs(b->GetPosition().x - holeBottom.x) < 2.5f  &&
+			std::abs(b->GetPosition().y - holeBottom.y) < 10.0f) {
+			b->SetLinearVelocity({ 0.0f, - 30.0f });
+
+		} else if (playerStatePoint == 2 &&
+				   std::abs(b->GetPosition().x - holeTop.x) < 2.5f &&
+				   std::abs(b->GetPosition().y - holeTop.y) < 25.0f) {
+			b->SetLinearVelocity({ 0.0f, 40.0f });
+		} else if (!playerBodiesFallen[b]) {
+			const auto vel = b->GetLinearVelocity();
+			b->SetLinearVelocity({ playerGameVelocity, vel.y });
+		}
+	}
+}
+
+void App::RespawnParticles() {
+	for (auto& b1 : playerBodies) {
+		if (b1->GetPosition().x < camPos) {
+			b1->SetTransform(
+				{ playerBodiesPointsMiddle.x, playerBodiesPointsMiddle.y },
+				b1->GetAngle());
+			b1->SetLinearVelocity(playerVelocityMiddle);
+		}
+	}
+}
+
+void App::RespawnEyes() {
+	for (auto& e : playerEyesBodies) {
+		if (e->GetPosition().y < 2.0
+			|| e->GetPosition().y > 45.0f) {
+			e->SetTransform({ camPos - 25.0f, 15.0f }, 0);
+		}
+	}
+}
+
+void App::UpdateBalancer(double dt) {
+	playerState += (playerStatePoints[playerStatePoint] - playerState) * dt * 10;
+
+	if (playerState <= 0.5) {
+		const auto remap = playerState * 2.0f;
+		for (auto& p : balancer) p.second = (1.0f - remap) * p.first[0] + remap * p.first[1];
+	}
+	else {
+		const auto remap = (playerState - 0.5f) * 2.0f;
+		for (auto& p : balancer) p.second = (1.0f - remap) * p.first[1] + remap * p.first[2];
+	}
+}
+
 void App::Update(double dt) {
 	progress.Update(dt);
 	shaker.Update(dt);
 
+	static float time = 0.0f;
+
 	if (!progress.IsPaused()) {
+		time += dt;
+
 		world.Step(dt, 1, 2);
 
 		world.SetGravity({ 0, playerGravityState });
 
 		// convex points
 
-		playerBodiesPointsMiddle = { 0.0f, 0.0f };
-		playerVelocityMiddle = { 0.0f, 0.0f };
-
-		for (auto i = 0; i < playerBodies.size(); i++) {
-			playerBodiesPoints[i] = playerBodies[i]->GetPosition();
-			playerBodiesPointsMiddle += playerBodiesPoints[i];
-			playerVelocityMiddle += playerBodies[i]->GetLinearVelocity();
-		}
-
-		playerBodiesPointsMiddle = (1.0f / playerBodies.size()) * playerBodiesPointsMiddle;
-		playerVelocityMiddle = (1.0f / playerBodies.size()) * playerVelocityMiddle;
+		ComputePoints();
 
 		// cam pos
 
-		camPos = camPos + (playerBodiesPointsMiddle.x - camPos) * dt * 4.0;
-
-		// eye points
-
-		for (auto i = 0; i < playerEyesBodies.size(); i++)
-			playerEyesBodiesPoints[i] = playerEyesBodies[i]->GetPosition();
+		ComputeCampPos(dt);
 
 		// body <-> body
 
-		for (auto& b1 : playerBodies) {
-			b1->SetAngularVelocity(dt * playerAngleState);
-
-			for (auto& b2 : playerBodies) {
-				const auto dir = b1->GetPosition() - b2->GetPosition();
-				b2->ApplyForceToCenter(playerForceState * dir, true);
-			}
-		}
+		BodyCrossBody(dt);
 
 		// eyes antigrav
 
-		for (auto& e : playerEyesBodies) {
-			e->ApplyForceToCenter({ 0.0, playerEyeAntigravState }, true);
-		}
+		EyesAntigrav();
 
 		// body <-> eye
 
-		for (auto& e : playerEyesBodies) {
-			for (auto& b : playerBodies) {
-				const auto dir = b->GetPosition() - e->GetPosition();
-				e->ApplyForceToCenter(playerEyeBodyForceState * dir, true);
-			}
-		}
+		BodyCrossEye();
 
 		// borders respawn
 
-		for (auto& b : borderBodies) {
-			if (b->GetPosition().x < - 200) {
-				b->SetTransform({ 200, b->GetPosition().y }, b->GetAngle());
-			}
-		}
+		RespawnBorders(false);
 
-		// back respawn
+		// respawn obstacles
 
-		const auto holeChoice = rand() % 3;
-		const auto doHole1 = holeChoice == 1;
-		const auto doHole2 = holeChoice == 2;
-		const auto hole1 = doHole1 ? 15 : 0;
-		const auto hole2 = doHole2 ? 15 : 0;
-
-		if (borderBodies[0]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0) {
-			borderBodies[0]->SetTransform(
-				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 25.0f,     5 }, 0);
-			borderBodies[1]->SetTransform(
-				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 25.0f,     50 }, 0);
-		}
-
-		if (borderBodies[2]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0) {
-			borderBodies[2]->SetTransform(
-				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole1, 5 }, 0);
-			borderBodies[3]->SetTransform(
-				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole2, 50 }, 0);
-
-			if (doHole1) {
-				holeBottom = { (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 125.0f + hole1 * 0.5f, 5.0f };
-			}
-
-			if (doHole2) {
-				holeTop = { (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 125.0f + hole2 * 0.5f, 45.0f };
-			}
-		}
-
-		const auto choice = rand() % 2;
-
-		if (bottomObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f &&
-			topObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f) {
-			if (choice == 0) {
-				bottomObstacle->SetTransform(
-					{ playerBodiesPointsMiddle.x + 75.0f, 10.0f }, bottomObstacle->GetAngle());
-			}
-			else if (choice == 1) {
-				topObstacle->SetTransform(
-					{ playerBodiesPointsMiddle.x + 75.0f, 45.0f }, topObstacle->GetAngle());
-			}
-		}
+		RespawnObstacles(false);
 
 		// fall out in holes
 
-		for (auto& b : playerBodies) {
-			// b->ApplyForce({ 0.0f, - 10.0f }, { 0.0f, 0.0f }, true);
-			if (playerStatePoint == 1 &&
-				std::abs(b->GetPosition().x - holeBottom.x) < 2.5f  &&
-				std::abs(b->GetPosition().y - 5.0f) < 10.0f) {
-				b->SetLinearVelocity({ 0.0f, - 30.0f });
-
-			} else if (playerStatePoint == 2 &&
-					   std::abs(b->GetPosition().x - holeTop.x) < 2.5f) {
-				b->SetLinearVelocity({ 0.0f, 40.0f });
-			} else {
-				const auto vel = b->GetLinearVelocity();
-				b->SetLinearVelocity({ 40.0f, vel.y });
-			}
-		}
+		FalloutHoles();
 
 		// particles respawn
 
-		for (auto& b1 : playerBodies) {
-			if ((playerBodiesPointsMiddle - b1->GetPosition()).Length() > 20.0) {
-				b1->SetTransform(
-					{ playerBodiesPointsMiddle.x, playerBodiesPointsMiddle.y },
-					b1->GetAngle());
-				b1->SetLinearVelocity(playerVelocityMiddle);
-			}
-		}
+		RespawnParticles();
+
+		//respawn eyes
+
+		RespawnEyes();
 
 		// handle balancer
 
-		playerState += (playerStatePoints[playerStatePoint] - playerState) * dt * 10;
+		UpdateBalancer(dt);
 
-		if (playerState <= 0.5) {
-			const auto remap = playerState * 2.0f;
-			for (auto& p : balancer) p.second = (1.0f - remap) * p.first[0] + remap * p.first[1];
-		}
-		else {
-			const auto remap = (playerState - 0.5f) * 2.0f;
-			for (auto& p : balancer) p.second = (1.0f - remap) * p.first[1] + remap * p.first[2];
+		// mark stuck bodies
+
+		if (time > 1.0) {
+
+			auto fallenCount = 0;
+
+			for (auto& b : playerBodies) {
+				if (b->GetPosition().y < 2.0
+					|| b->GetPosition().y > 50.0f) {
+					playerBodiesFallen[b] = true;
+					fallenCount++;
+				}
+				else {
+					playerBodiesFallen[b] = false;
+				}
+			}
+
+			if (fallenCount > playerBodiesCount / 2 ) {
+				progress.RestartGame();
+
+				for (auto& b : playerBodies) {
+					const float x = 0 + rand() % 50;
+					const float y = 15 + rand() % 30;
+					b->SetTransform({ x, y }, 0);
+					playerBodiesFallen[b] = false;
+				}
+
+				for (auto& e : playerEyesBodies) {
+					const float x = 0 + rand() % 50;
+					const float y = 15 + rand() % 30;
+					e->SetTransform({ x, y }, 0);
+				}
+
+				camPos = 0;
+				time = 0.0f;
+
+				ComputePoints();
+				RespawnBorders(true);
+				RespawnObstacles(true);
+				GoSolid();
+
+				playerGameVelocity = playerGameVelocityDefault;
+			}
 		}
 	}
 }
 
-/*void drawTexture(GLuint* textures) {
+static void checkGlError(const char* op) {
+	for (GLint error = glGetError(); error; error = glGetError()) {
+		LOGI("after %s() glError (0x%x)\n", op, error);
+	}
+}
+
+void drawTexture(const GLuint texture,
+				 const float x,
+				 const float y,
+				 const float width,
+				 const float height,
+				 const float scaleTcX,
+				 const float scaleTcY) {
+
 	b2Vec2 points[] = {
-			{0,0},
-			{50,10},
-			{10,50},
-			{50,50}
+			{x,y},
+			{x + width, y},
+			{x,y + height},
+			{x + width,y + height}
 	};
 
 	b2Vec2 tex[] = {
 				{0,0},
-				{1,0},
+				{width * scaleTcX,0},
 				{0,1},
-				{1,1}
+				{width * scaleTcX,1}
 	};
 
 	glColor4f(0.5, 0.5, 0.5, 1);
 
 	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glVertexPointer(2, GL_FLOAT, 0, points);
 	glTexCoordPointer(2, GL_FLOAT, 0, tex);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
-
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glDisableClientState(GL_VERTEX_ARRAY);
-}*/
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisable(GL_TEXTURE_2D);
+}
 
 void App::Draw() {
 	SetProjection(fieldWidth, fieldHeight);
@@ -380,25 +507,69 @@ void App::Draw() {
 	progress.Draw();
 
 	if (!progress.IsPaused()) {
+
+		// background
+
+		SetTranslate(0, 0);
+		shaker.ApplyMatrix();
+
+		drawTexture(texture, 0, 0, fieldWidth, fieldHeight, 1.0f / fieldWidth, 1.0f);
+		checkGlError("test");
+
+		// debug data
+
 		SetTranslate(25 - camPos, 0);
 		shaker.ApplyMatrix();
 
-	drawCreature(playerBodiesPoints, b2Color(playerColorRState, playerColorGState, playerColorBState), 1, playerStatePoint);
-	drawEyes(playerEyesBodiesPoints, playerBodiesPoints);
+		world.DrawDebugData();
 
-	//drawTexture(textures);
+		// platforms
 
-	world.DrawDebugData();
+		drawTexture(bottom,
+					borderBodies[0]->GetPosition().x - 100,
+					0,
+					200,
+					8,
+					1.0f / fieldWidth * 3.0f,
+					1.0f);
+		drawTexture(top,
+					borderBodies[1]->GetPosition().x - 100,
+					fieldHeight - 13,
+					200,
+					13,
+					1 / fieldWidth * 2.0f,
+					1.0f);
+		drawTexture(bottom,
+					borderBodies[2]->GetPosition().x - 100,
+					0,
+					200,
+					8,
+					1.0f / fieldWidth * 3.0f,
+					1.0f);
+		drawTexture(top,
+					borderBodies[3]->GetPosition().x - 100,
+					fieldHeight - 13,
+					200,
+					13,
+					1 / fieldWidth * 2.0f,
+					1.0f);
 
-	SetTranslate(0, 0);
-	shaker.ApplyMatrix();
+		// creature
 
-	DrawNumber(false,
-			   fieldWidth - 5.0f,
-			   fieldHeight - 10.0f,
-			   1,
-			   1.5,
-			   progress.GetLevel());
+		drawCreature(playerBodiesPoints, b2Color(playerColorRState, playerColorGState, playerColorBState), 1, playerStatePoint);
+		drawEyes(playerEyesBodiesPoints, playerBodiesPoints);
+
+		// numbers
+
+		SetTranslate(0, 0);
+		shaker.ApplyMatrix();
+
+		DrawNumber(false,
+				   fieldWidth - 5.0f,
+				   fieldHeight - 10.0f,
+				   1,
+				   1.5,
+				   progress.GetLevel());
 	}
 }
 
@@ -410,6 +581,47 @@ void App::Touch(int player, float newX, float newY) {
 	auto y = (1.0f - newY / screenHeight) * fieldHeight;
 }
 
+void App::GoSolid() {
+	playerStatePoint = 0;
+
+	shaker.Shake();
+
+	for (auto& e : playerEyesBodies) {
+		b2Filter f = e->GetFixtureList()->GetFilterData();
+		f.maskBits = borderCategory | playerBodyCategory | playerEyeCategory;
+		e->GetFixtureList()->SetFilterData(f);
+	}
+
+	for (auto& b1 : playerBodies) {
+		b1->ApplyLinearImpulse({ 0.0f, -100.0f}, {0.0f, 0.0f}, true);
+	}
+}
+
+void App::GoLiquid() {
+	playerStatePoint = 1;
+
+	for (auto& e : playerEyesBodies) {
+		b2Filter f = e->GetFixtureList()->GetFilterData();
+		f.maskBits = borderCategory | playerBodyCategory | playerEyeCategory;
+		e->GetFixtureList()->SetFilterData(f);
+	}
+}
+
+void App::GoGas() {
+	playerStatePoint = 2;
+
+	for (auto& e : playerEyesBodies) {
+		b2Filter f = e->GetFixtureList()->GetFilterData();
+		f.maskBits = borderCategory | playerEyeCategory;
+		e->GetFixtureList()->SetFilterData(f);
+	}
+
+	for (auto& b1 : playerBodies) {
+		const auto vel = b1->GetLinearVelocityFromLocalPoint({ 0, 0});
+		b1->SetLinearVelocity(vel + b2Vec2 { 0, 40.0 });
+	}
+}
+
 void App::TouchEnd(int player, float newX, float newY) {
 	if (progress.IsPaused()) {
 		progress.Touch(newX, newY);
@@ -419,36 +631,16 @@ void App::TouchEnd(int player, float newX, float newY) {
 	playerStatePoint++;
 	if (playerStatePoint >= playerStatePoints.size()) {
 		playerStatePoint = 0;
-		shaker.Shake();
 	}
 
 	// drop eyes
 
 	if  (playerStatePoint == 2) {
-		for (auto& e : playerEyesBodies) {
-			b2Filter f = e->GetFixtureList()->GetFilterData();
-			f.maskBits = borderCategory | playerEyeCategory;
-			e->GetFixtureList()->SetFilterData(f);
-		}
-	}
-	else {
-		for (auto& e : playerEyesBodies) {
-			b2Filter f = e->GetFixtureList()->GetFilterData();
-			f.maskBits = borderCategory | playerBodyCategory | playerEyeCategory;
-			e->GetFixtureList()->SetFilterData(f);
-		}
-	}
-
-	if (playerStatePoint == 0) {
-		for (auto& b1 : playerBodies) {
-			b1->ApplyLinearImpulse({ 0.0f, -100.0f}, {0.0f, 0.0f}, true);
-		}
-	}
-	else if (playerStatePoint == 2) {
-		for (auto& b1 : playerBodies) {
-			const auto vel = b1->GetLinearVelocityFromLocalPoint({ 0, 0});
-			b1->SetLinearVelocity(vel + b2Vec2 { 0, 25.0 });
-		}
+		GoGas();
+	} else if (playerStatePoint == 0) {
+		GoSolid();
+	} else if (playerStatePoint == 1) {
+		GoLiquid();
 	}
 }
 

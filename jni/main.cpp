@@ -138,7 +138,7 @@ static int engine_init_display(struct engine* engine) {
     context = eglCreateContext(display, config, NULL, NULL);
 
     if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
-        LOGW("Unable to eglMakeCurrent");
+        // LOGW("Unable to eglMakeCurrent");
         return -1;
     }
 
@@ -165,23 +165,7 @@ static int engine_init_display(struct engine* engine) {
 /**
  * Just the current frame in the display.
  */
-static void engine_draw_frame(struct engine* engine) {
-    if (engine->display == NULL) {
-        // No display.
-        return;
-    }
-
-    // Just fill the screen with a color.
-    //glClearColor(0xe1 / 255.0f, 0xfa / 255.0f, 0xfc / 255.0f, 1);
-    glClearColor(0.7, 0.7, 0.7, 1);
-	glColor4f(0xe4 / 255.0f, 0x56 / 255.0f, 0x35 / 255.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-	glLineWidth(2.1f);
-
-	application.Draw();
-
-    eglSwapBuffers(engine->display, engine->surface);
-}
+static void engine_draw_frame(struct engine* engine);
 
 /**
  * Tear down the EGL context currently associated with the display.
@@ -426,14 +410,14 @@ AAsset* asset = 0;
 void png_asset_read(png_structp png, png_bytep data, png_size_t size) {
     AAsset_read(asset, data, size);
     int numBytesRemaining = AAsset_getRemainingLength(asset);
-    LOGI("Read size: %d, remaining: %d", size, numBytesRemaining);
+    // LOGI("Read size: %d, remaining: %d", size, numBytesRemaining);
 }
 
 //Image*
-int readPNG(AAssetManager* aassetManager, const char* filename) {
+GLuint readPNG(AAssetManager* aassetManager, const char* filename) {
 	asset = AAssetManager_open(aassetManager, filename, AASSET_MODE_UNKNOWN);
 	if (asset == NULL) {
-	  LOGW("COULD NOT OPEN ASSET");
+	  // LOGW("COULD NOT OPEN ASSET");
 	}
 	int HEADER_SIZE = 8;
 	off_t bufferSize = AAsset_getLength(asset);
@@ -443,32 +427,32 @@ int readPNG(AAssetManager* aassetManager, const char* filename) {
 
 	int is_png = !png_sig_cmp(buffer, 0, 8);
 	if (!is_png) {
-		LOGW("File texture.png format is not PNG.");
+		// LOGW("File texture.png format is not PNG.");
 		return 0;
 	}
 
-	LOGI("Size of the file: %d, bytes read: %d, bytes remain: %d",
-	            bufferSize, numBytesRead, numBytesRemaining);
+	// LOGI("Size of the file: %d, bytes read: %d, bytes remain: %d",
+	//             bufferSize, numBytesRead, numBytesRemaining);
 	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
 	            NULL, NULL);
 	if (!png_ptr) {
-		LOGW("Unable to create PNG structure: %s", filename);
+		// LOGW("Unable to create PNG structure: %s", filename);
 		return 0;
 	}
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr) {
 		png_destroy_read_struct(&png_ptr, (png_infopp) NULL, (png_infopp) NULL);
-		LOGW("Unable to create png info : %s", filename);
+		// LOGW("Unable to create png info : %s", filename);
 		return 0;
 	}
 	png_infop end_info = png_create_info_struct(png_ptr);
 	if (!end_info) {
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp) NULL);
-		LOGW("Unable to create png end info : %s", filename);
+		// LOGW("Unable to create png end info : %s", filename);
 		return 0;
 	}
 	if (setjmp(png_jmpbuf(png_ptr))) {
-		LOGW("Error during setjmp : %s", filename);
+		// LOGW("Error during setjmp : %s", filename);
 		png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 		return 0;
 	}
@@ -481,18 +465,18 @@ int readPNG(AAssetManager* aassetManager, const char* filename) {
 	png_uint_32 twidth, theight;
 	png_get_IHDR(png_ptr, info_ptr, &twidth, &theight, &bit_depth, &color_type,
 			NULL, NULL, NULL);
-	LOGI("Width: %d, height: %d.", twidth, theight);
+	// LOGI("Width: %d, height: %d.", twidth, theight);
 
 	png_read_update_info(png_ptr, info_ptr);
 	int rowbytes = png_get_rowbytes(png_ptr, info_ptr);
-	    LOGI("Row size: %d bytes.", rowbytes);
+	    // LOGI("Row size: %d bytes.", rowbytes);
 
 	png_byte *image_data = new png_byte[rowbytes * theight];
 		if (!image_data) {
 			//clean up memory and close stuff
 			png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
-			LOGW(
-					"Unable to allocate image_data while loading %s ", filename);
+			// LOGW(
+			// 		"Unable to allocate image_data while loading %s ", filename);
 		}
 
 	png_bytep *row_pointers = new png_bytep[theight];
@@ -500,8 +484,8 @@ int readPNG(AAssetManager* aassetManager, const char* filename) {
 		//clean up memory and close stuff
 		png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 		delete[] image_data;
-		LOGW(
-				"Unable to allocate row_pointer while loading %s ", filename);
+		// LOGW(
+		// 		"Unable to allocate row_pointer while loading %s ", filename);
 	}
 
 	for (int i = 0; i < theight; ++i)
@@ -510,8 +494,8 @@ int readPNG(AAssetManager* aassetManager, const char* filename) {
 	png_read_image(png_ptr, row_pointers);
 
 	for (int i = 0; i < 10; i ++) {
-		LOGI("Pixel %d: %d %d %d %d",i, image_data[i * 4], image_data[i * 4 + 1],
-				image_data[i * 4 + 2], image_data[i * 4 + 3]);
+		// LOGI("Pixel %d: %d %d %d %d",i, image_data[i * 4], image_data[i * 4 + 1],
+		// 		image_data[i * 4 + 2], image_data[i * 4 + 3]);
 	}
 
 	//Image* image = new Image((unsigned char*) image_data, twidth, theight, twidth * theight * 4, 0);
@@ -528,7 +512,86 @@ int readPNG(AAssetManager* aassetManager, const char* filename) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return 0;//image; */
+
+    struct color {
+        unsigned char x;
+        unsigned char y;
+        unsigned char z;
+        unsigned char w;
+
+        void Set(const unsigned char r,
+                 const unsigned char g,
+                 const unsigned char b,
+                 const unsigned char a) {
+            x = r;
+            y = g;
+            z = b;
+            w = a;
+        }
+    };
+
+    color data[256 * 256];
+    data[0].Set(1, 0, 0, 1);
+    data[1].Set(0, 1, 0, 1);
+    data[2].Set(0, 0, 1, 1);
+    data[3].Set(1, 1, 1, 0);
+
+    GLuint tex = 0;
+
+    // glShadeModel(GL_FLAT);
+    glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, twidth, theight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 image_data);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    LOGI("create %d", int(tex));
+
+    return tex;
 }
+
+AAssetManager* assetManager;
+
+/**
+ * Just the current frame in the display.
+ */
+static void engine_draw_frame(struct engine* engine) {
+    if (engine->display == NULL) {
+        // No display.
+        return;
+    }
+
+    static bool firstCall = true;
+
+    if (firstCall) {
+        application.Init();
+        const auto texture = readPNG(assetManager, "texture.png");
+        const auto top = readPNG(assetManager, "top.png");
+        const auto bottom = readPNG(assetManager, "bottom.png");
+        application.SetTexture(texture);
+        application.SetBottomTexture(bottom);
+        application.SetTopTexture(top);
+        firstCall = false;
+    }
+
+    // Just fill the screen with a color.
+    //glClearColor(0xe1 / 255.0f, 0xfa / 255.0f, 0xfc / 255.0f, 1);
+    glClearColor(0.7, 0.7, 0.7, 1);
+	glColor4f(0xe4 / 255.0f, 0x56 / 255.0f, 0x35 / 255.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+	glLineWidth(2.1f);
+
+	application.Draw();
+
+    eglSwapBuffers(engine->display, engine->surface);
+}
+
 /**
  * This is the main entry point of a native application that is using
  * android_native_app_glue.  It runs in its own thread, with its own
@@ -538,19 +601,18 @@ void android_main(struct android_app* state) {
     srand((time(NULL)));
 
     //asset start reading
-    AAssetManager* assetManager = state->activity->assetManager;
+    assetManager = state->activity->assetManager;
 
     /*off_t bufferSize = AAsset_getLength(asset);
     char* buffer = new char[bufferSize];
     AAsset_read(asset, buffer, bufferSize);*/
     //Image* image =
-    readPNG(assetManager, "texture.png");
 
     /*asset = AAssetManager_open(assetManager, "text.txt", AASSET_MODE_UNKNOWN);
     off_t bufferSize = AAsset_getLength(asset);
     char* buffer = new char[bufferSize];
     AAsset_read(asset, buffer, bufferSize);
-    LOGW("read: %s", buffer);
+    // LOGW("read: %s", buffer);
     AAsset_close(asset);*/
     //end asset read
 
@@ -579,7 +641,6 @@ void android_main(struct android_app* state) {
 
 	// init application
 
-	application.Init();
 	struct timeval prevTime;
 	struct timeval curTime = prevTime;
 	prevTime.tv_sec = 0;

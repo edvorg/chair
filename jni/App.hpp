@@ -29,6 +29,8 @@
 #include "ScreenShaker.hpp"
 #include <Box2D/Box2D.h>
 
+#include <unordered_map>
+
 namespace test {
 
 // main application class, handles all game objects
@@ -54,8 +56,34 @@ public:
 	// set real device screen resolution
 	void ScreenSize(float newWidth, float newHeight);
 
+    void SetTexture(const unsigned int texture) {
+        this->texture = texture;
+    }
+
+    void SetTopTexture(const unsigned int top) {
+        this->top = top;
+    }
+
+    void SetBottomTexture(const unsigned int bottom) {
+        this->bottom = bottom;
+    }
+
 protected:
 private:
+    void ComputeCampPos(double dt);
+    void ComputePoints();
+    void BodyCrossBody(double dt);
+    void EyesAntigrav();
+    void BodyCrossEye();
+    void RespawnBorders(bool force);
+    void RespawnObstacles(bool force);
+    void FalloutHoles();
+    void RespawnParticles();
+    void RespawnEyes();
+    void UpdateBalancer(double dt);
+    void GoSolid();
+    void GoLiquid();
+    void GoGas();
 
     static constexpr const auto playerBodiesCount = 32;
     static constexpr const auto playerEyesCount = 2;
@@ -76,6 +104,8 @@ private:
     static constexpr const auto playerBodyCategory = 1;
     static constexpr const auto playerEyeCategory = 2;
     static constexpr const auto borderCategory = 4;
+
+    static constexpr const auto playerGameVelocityDefault = 40.0f;
 
     //{ solid liquid gas }
     const std::vector<float> playerGravityStates { -18.8, -9.8, 4.0 };
@@ -106,6 +136,10 @@ private:
 
     float camPos = 0.0f;
 
+    unsigned int texture = 0;
+    unsigned int bottom = 0;
+    unsigned int top = 0;
+
     /// player
 
     float playerState = 0.0f;
@@ -124,6 +158,7 @@ private:
 	std::vector<b2Vec2> playerBodiesPoints;
 	std::vector<b2Body*> playerBodies;
     std::vector<std::shared_ptr<b2Shape>> playerBodiesShapes;
+    std::unordered_map<b2Body*, bool> playerBodiesFallen;
 
     b2Vec2 playerBodiesPointsMiddle;
     b2Vec2 playerVelocityMiddle;
@@ -131,6 +166,8 @@ private:
     std::vector<b2Vec2> playerEyesBodiesPoints;
     std::vector<b2Body*> playerEyesBodies;
     std::vector<std::shared_ptr<b2Shape>> playerEyesBodiesShapes;
+
+    float playerGameVelocity = playerGameVelocityDefault;
 
     /// borders
 
