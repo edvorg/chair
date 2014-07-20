@@ -314,58 +314,73 @@ void App::Draw() {
 		SetTranslate(25 - camPos, 0);
 		shaker.ApplyMatrix();
 
-		//progress.Draw();
+//	SetTranslate(0, 0);
+	//progress.Draw();
 
-		//b2Vec2* vertices = playerPoints.data();
-		b2Color color(0.7,0.7,0.7);
-		//drawPoly(vertices, playerPoints.size(),color);
+	//b2Vec2* vertices = playerPoints.data();
+	b2Color color(0.7,0.7,0.7);
+	//drawPoly(vertices, playerPoints.size(),color);
 
+	/*std::vector<b2Vec2> leftovers;
+	std::vector<b2Vec2> outer= quickHull(playerBodiesPoints, &leftovers);
+	std::vector<b2Vec2> inner= quickHull(leftovers);*/
+	//calculate all the points that are left
+
+	//color.Set(0,0,0.8);
+	//drawPoints(LeftRight.data(), LeftRight.size(),color);
+	//drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
+	color.Set(0.7,0,0);
+	//drawPoints(Outer.data(), Outer.size(),color, 1);
+	//drawPoly(Outer.data(), Outer.size(),color);
+
+	//outer = smoothSurface(outer, 4, 0.2);
+	//inner = smoothSurface(inner, 4, 0.2);
+	//outer = smoothSurface(outer, 0.2);
+	//inner = smoothSurface(outer, 0.2);
+	//inner = smoothSurface(outer, 0.2);
+	//color.Set(0,0,0.5);
+	//drawPoints(Outer.data(), Outer.size(),color, 1);
+
+	/*drawPoly(outer.data(), outer.size(),color);
+	color.Set(0.8,0,0.05);
+	drawPoly(inner.data(), inner.size(),color);
+	float eyesRadius = 2;
+	float pointsRadius = getPointsRadius(playerBodiesPoints); //maybe take surface radius here?
+	float eyesSizeThreshold = 8;
+	LOGW("POINTS: %f", pointsRadius);
+	if (pointsRadius<eyesSizeThreshold*eyesRadius) {
+		eyesRadius = pointsRadius/eyesSizeThreshold;
+	}
+	for (auto point: playerEyesBodiesPoints) {
+		color.Set(1,1,1);
+		drawEllipse(point, eyesRadius, color, 15);
+		color.Set(0,0,0.7);
+		drawEllipse(point, eyesRadius*0.2, color, 15);
+	}*/
+
+	std::vector<std::vector<b2Vec2>> bodyClusters = findClusters(playerBodiesPoints, 5);
+	int i=0;
+	int maxClusters = bodyClusters.size();
+	for (auto cluster: bodyClusters) {
+		//drawPoints(cluster.data(), cluster.size(),color, 1);
+		if (cluster.size()<4) {
+			cluster = sphericize(cluster,2,6);
+	    }
 		std::vector<b2Vec2> leftovers;
-		std::vector<b2Vec2> outer= quickHull(playerBodiesPoints, &leftovers);
-		std::vector<b2Vec2> inner= quickHull(leftovers);
-		//calculate all the points that are left
-
-		//color.Set(0,0,0.8);
-		//drawPoints(LeftRight.data(), LeftRight.size(),color);
-		//drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
-		color.Set(0.7,0,0);
-		//drawPoints(Outer.data(), Outer.size(),color, 1);
-		//drawPoly(Outer.data(), Outer.size(),color);
+		std::vector<b2Vec2> outer;
+		std::vector<b2Vec2> inner;
+		outer = quickHull(cluster, &leftovers);
+		inner = quickHull(leftovers);
 
 		outer = smoothSurface(outer, 4, 0.2);
 		inner = smoothSurface(inner, 4, 0.2);
-		//outer = smoothSurface(outer, 0.2);
-		//inner = smoothSurface(outer, 0.2);
-		//inner = smoothSurface(outer, 0.2);
-		//color.Set(0,0,0.5);
-		//drawPoints(Outer.data(), Outer.size(),color, 1);
 
+		color.Set(0.5, 0, 0);
 		drawPoly(outer.data(), outer.size(),color);
-		color.Set(0.8,0,0.05);
+		color.Set(1, 0, 0);
 		drawPoly(inner.data(), inner.size(),color);
-		float eyesRadius = 2;
-		float pointsRadius = getPointsRadius(playerBodiesPoints); //maybe take surface radius here?
-		float eyesSizeThreshold = 8;
-		LOGW("POINTS: %f", pointsRadius);
-		if (pointsRadius<eyesSizeThreshold*eyesRadius) {
-			eyesRadius = pointsRadius/eyesSizeThreshold;
-		}
-		for (auto point: playerEyesBodiesPoints) {
-			color.Set(1,1,1);
-			drawEllipse(point, eyesRadius, color, 15);
-			color.Set(0,0,0.7);
-			drawEllipse(point, eyesRadius*0.2, color, 15);
-		}
-
-		/*std::vector<std::vector<b2Vec2>> bodyClusters = findClusters(playerBodiesPoints, 10);
-		  int i=0;
-		  int maxClusters = bodyClusters.size();
-		  for (auto cluster: bodyClusters) {
-		  color.Set(1.0*i/maxClusters, 0, 1.0*i/maxClusters);
-		  drawPoints(cluster.data(), cluster.size(),color, 1);
-		  i++;
-		  }*/
-
+		i++;
+	}
 
 //
 //		//b2Vec2* vertices = playerPoints.data();
