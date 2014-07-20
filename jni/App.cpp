@@ -301,6 +301,19 @@ void App::Update(double dt) {
 			const auto vel = b1->GetLinearVelocity();
 			b1->SetLinearVelocity({ 40.0f, vel.y });
 		}
+
+		// handle balancer
+
+		playerState += (playerStatePoints[playerStatePoint] - playerState) * dt * 10;
+
+		if (playerState <= 0.5) {
+			const auto remap = playerState * 2.0f;
+			for (auto& p : balancer) p.second = (1.0f - remap) * p.first[0] + remap * p.first[1];
+		}
+		else {
+			const auto remap = (playerState - 0.5f) * 2.0f;
+			for (auto& p : balancer) p.second = (1.0f - remap) * p.first[1] + remap * p.first[2];
+		}
 	}
 }
 
@@ -377,19 +390,6 @@ void App::TouchEnd(int player, float newX, float newY) {
 			const auto vel = b1->GetLinearVelocityFromLocalPoint({ 0, 0});
 			b1->SetLinearVelocity(vel + b2Vec2 { 0, 25.0 });
 		}
-	}
-
-	// handle balancer
-
-	playerState = playerStatePoints[playerStatePoint];
-
-	if (playerState <= 0.5) {
-		const auto remap = playerState * 2.0f;
-		for (auto& p : balancer) p.second = (1.0f - remap) * p.first[0] + remap * p.first[1];
-	}
-	else {
-		const auto remap = (playerState - 0.5f) * 2.0f;
-		for (auto& p : balancer) p.second = (1.0f - remap) * p.first[1] + remap * p.first[2];
 	}
 }
 
