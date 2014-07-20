@@ -328,6 +328,7 @@ void App::Draw() {
 		shaker.ApplyMatrix();
 
 	drawCreature(playerBodiesPoints, b2Color(playerColorRState, playerColorGState, playerColorBState), 1);
+	drawEyes(playerEyesBodiesPoints, playerBodiesPoints);
 
 	world.DrawDebugData();
 

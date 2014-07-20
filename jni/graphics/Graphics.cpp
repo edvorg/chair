@@ -392,7 +392,20 @@ void drawCreature(std::vector<b2Vec2> vertices, b2Color color, float alpha) {
 	}
 }
 
-  void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number) {
+void drawEyes(std::vector<b2Vec2> vertices, std::vector<b2Vec2> creature) {
+	float creatureRadius = getPointsRadius(creature);
+	float eyesRadius = 2;
+	float koeff = 8;
+	if (creatureRadius<eyesRadius * koeff) {
+		eyesRadius=creatureRadius/koeff;
+	}
+	for (auto eye: vertices) {
+		drawEllipse(eye, eyesRadius, b2Color(1,1,1), 15);
+		drawEllipse(eye, eyesRadius*0.2, b2Color(0,0,0), 15);
+	}
+}
+
+void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number) {
 	if (fromLeft) {
 	  std::stack<unsigned int> digits;
 
