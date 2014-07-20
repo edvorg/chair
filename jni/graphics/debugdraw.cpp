@@ -22,7 +22,9 @@ void DebugDraw::DrawPolygon(const b2Vec2* v, int32 vertexCount, const b2Color& c
 }
 
 void DebugDraw::DrawSolidPolygon(const b2Vec2* v, int32 vertexCount, const b2Color& color) {
-	test::drawPoly(v, vertexCount, color, 0.5);
+
+	if (std::abs(0.900000f - color.r) > 0.1)
+		test::drawPoly(v, vertexCount, color, 0.5);
 }
 
 void DebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) {
