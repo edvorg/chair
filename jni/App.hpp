@@ -61,7 +61,7 @@ private:
     static constexpr const auto playerEyesCount = 2;
     static constexpr const auto playerStatesCount = 3;
     static constexpr const auto playerBodySize = 0.5f;
-    static constexpr const auto playerEyeSize = 1.5f;
+    static constexpr const auto playerEyeSize = 1.0f;
     static constexpr const auto playerBodyDencity = 1.0f;
     static constexpr const auto playerEyeDencity = 0.25f;
 
