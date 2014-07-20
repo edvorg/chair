@@ -49,6 +49,19 @@ void SetTranslate(float x, float y, bool override) {
   float distance(b2Vec2 A, b2Vec2 B) {
 	  return sqrt((A.x-B.x)*(A.x-B.x)+(A.y-B.y)*(A.y-B.y));
   }
+
+  std::vector<b2Vec2> sphericize(std::vector<b2Vec2> vertices, float radius, int numPoints) {
+	  std::vector<b2Vec2> result;
+	  for (auto vertex: vertices) {
+		  for (int i=0;i<numPoints; i++) {
+			  b2Vec2 point(vertex.x + radius*cos(2*M_PI*i/numPoints),
+					       vertex.y + radius*sin(2*M_PI*i/numPoints));
+			  result.push_back(point);
+		  }
+	  }
+	  return result;
+  }
+
   std::vector<std::vector<b2Vec2>> findClusters(std::vector<b2Vec2> vertices, float threshold) {
 	  std::vector<std::vector<b2Vec2>> clusters;
 	  b2Vec2* verticesData = vertices.data();
@@ -76,9 +89,10 @@ void SetTranslate(float x, float y, bool override) {
 					 color[j] = color[i];
 				 } else {
 					 //recolor the whole new coloring
-					 for (int k = i+1; k<j; k++)
+					 int oldColor = color[i];
+					 for (int k = 0; k<j; k++)
 					 {
-						 if (color[k] == color[i]) {
+						 if (color[k] == oldColor) {
 							 color[k] = color[j];
 						 }
 					 }
@@ -96,8 +110,9 @@ void SetTranslate(float x, float y, bool override) {
 			  if (color[i] == col)
 				  tempSet.push_back(verticesData[i]);
 		  }
-		  if (tempSet.size()>0)
+		  if (tempSet.size()>0) {
 			  clusters.push_back(tempSet);
+		  }
 	  }
 
 	  return clusters;

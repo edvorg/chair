@@ -40,6 +40,7 @@ void SetTranslate(float x, float y, bool override = true);
   void DrawDigit(float x, float y, float sizex, float sizey, unsigned int digit);
 
   std::vector<std::vector<b2Vec2>> findClusters(std::vector<b2Vec2> vertices, float threshold);
+  std::vector<b2Vec2> sphericize(std::vector<b2Vec2> vertices, float radius, int numPoints=4);
   float getPointsRadius(std::vector<b2Vec2> vertices);
   void drawEllipse(b2Vec2 center, float radius, b2Color color, int numPoints = 6);
   void drawPoints(const b2Vec2* points, int32 vertexCount, b2Color color, float radius, int numPoints = 6);
