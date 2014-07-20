@@ -46,6 +46,106 @@ void SetTranslate(float x, float y, bool override) {
 	glOrthof(0, fieldWidth, 0, fieldHeight, 1, -1);
   }
 
+  float distance(b2Vec2 A, b2Vec2 B) {
+	  return sqrt((A.x-B.x)*(A.x-B.x)+(A.y-B.y)*(A.y-B.y));
+  }
+  std::vector<std::vector<b2Vec2>> findClusters(std::vector<b2Vec2> vertices, float threshold) {
+	  std::vector<std::vector<b2Vec2>> clusters;
+	  b2Vec2* verticesData = vertices.data();
+	  int verticesCount = vertices.size();
+	  std::vector<b2Vec2> tempSet;
+
+	  //init colours
+	  int* color = new int[vertices.size()];
+	  for (int i=0; i<vertices.size(); i++) color[i]=0;
+
+	  //go thru all the vertices
+	  int maxColor = 0;
+	  for (int i=0; i<verticesCount; i++) {
+		  //if the vertex has not been coloured before, colour it into a new colour
+		  if (color[i] == 0) {
+			  maxColor++;
+			  color[i] = maxColor;
+		  }
+
+		  for (int j=i+1; j<verticesCount; j++) {
+			 //when the two points are near
+			 if (distance(verticesData[i],verticesData[j])<threshold) {
+				 //colour the second one to the colour of the cluster
+				 if (color[j] == 0) {
+					 color[j] = color[i];
+				 } else {
+					 //recolor the whole new coloring
+					 for (int k = i+1; k<j; k++)
+					 {
+						 if (color[k] == color[i]) {
+							 color[k] = color[j];
+						 }
+					 }
+					 color[i] = color[j];
+				 }
+			 }
+		  }
+	  }
+
+	  //separate vertices into clusters by colour
+	  //very much not optimized, to be improved later
+	  for (int col = 1; col<=maxColor; col++) {
+		  std::vector<b2Vec2> tempSet;
+		  for (int i=0; i< verticesCount; i++) {
+			  if (color[i] == col)
+				  tempSet.push_back(verticesData[i]);
+		  }
+		  if (tempSet.size()>0)
+			  clusters.push_back(tempSet);
+	  }
+
+	  return clusters;
+  }
+
+  float getPointsRadius(std::vector<b2Vec2> vertices) {
+	  float radius = 0;
+	  if (!vertices.empty()) {
+		  float minX, maxX, minY, maxY;
+		  minX = maxX = (*vertices.begin()).x;
+		  minY = maxY = (*vertices.begin()).y;
+		  for (auto vertex: vertices) {
+			  if (vertex.x<minX) minX = vertex.x;
+			  if (vertex.x>maxX) maxX = vertex.x;
+			  if (vertex.y<minY) minY = vertex.y;
+			  if (vertex.y>maxY) maxY = vertex.y;
+		  }
+		  return sqrt((maxX-minX)*(maxX-minX) + (maxY-minY)*(maxY-minY));
+	  }
+	  return radius;
+  }
+
+  std::vector<b2Vec2> smoothSegment(b2Vec2 A, b2Vec2 B, float smoothRatio) {
+	  std::vector<b2Vec2> result;
+	  b2Vec2 C(A.x + (B.x-A.x)*smoothRatio, A.y + (B.y-A.y)*smoothRatio);
+	  result.push_back(C);
+	  C.Set(B.x + (A.x-B.x)*smoothRatio, B.y + (A.y-B.y)*smoothRatio);
+	  result.push_back(C);
+	  return result;
+  }
+  std::vector<b2Vec2> smoothSurface(std::vector<b2Vec2> vertices, int iterations, float smoothRatio) {
+	  std::vector<b2Vec2> answer;
+	  if (vertices.size()>1) {
+		  auto it1 = vertices.begin();
+		  auto it2 = it1+1;
+		  while (true) {//it2 != vertices.end()) {
+			  std::vector<b2Vec2> smoothed = smoothSegment(*it1, *it2, smoothRatio);
+			  answer.insert(answer.end(), smoothed.begin(), smoothed.end());
+			  if (it2 == vertices.begin()) break;
+			  it1 = it2;
+			  it2++;
+			  if (it2 == vertices.end()) it2 = vertices.begin();
+		  }
+	  }
+	  if (iterations>1) return smoothSurface(answer, iterations-1, smoothRatio);
+	  return answer;
+  }
+
   bool isToTheLeftFromLine(b2Vec2 A, b2Vec2 B, b2Vec2 C) {
 	  bool answer = ((B.x - A.x)*(C.y - A.y) - (B.y - A.y)*(C.x - A.x)) > 0;
 	  return answer;
@@ -61,7 +161,7 @@ void SetTranslate(float x, float y, bool override) {
 	  float bottom = sqrt(D1*D1+D2*D2);
 	  return 10*top/bottom;
   }
-  std::vector<b2Vec2> subHull(b2Vec2 A, b2Vec2 B, std::vector<b2Vec2> vertices) {
+  std::vector<b2Vec2> subHull(b2Vec2 A, b2Vec2 B, std::vector<b2Vec2> vertices, std::vector<b2Vec2>* leftovers) {
   	  std::vector<b2Vec2> answer;
 
   	  float maxDistance = 100;
@@ -89,22 +189,24 @@ void SetTranslate(float x, float y, bool override) {
   				  set1.push_back(*vertex);
   			  } else if (isToTheLeftFromLine(*maxIterator, B, *vertex)) {
   				  set2.push_back(*vertex);
+  			  } else if (leftovers!=nullptr) {
+  				  leftovers->push_back(*vertex);
   			  }
   		  }
   	  }
 
-  	  set1 = subHull(A, *maxIterator, set1);
-  	  set2 = subHull(*maxIterator, B, set2);
+  	  set1 = subHull(A, *maxIterator, set1, leftovers);
+  	  set2 = subHull(*maxIterator, B, set2, leftovers);
 
-  	  answer.insert(answer.end(), set1.begin(), set1.end());
-  	  answer.push_back(*maxIterator);
   	  answer.insert(answer.end(), set2.begin(), set2.end());
+  	  answer.push_back(*maxIterator);
+  	  answer.insert(answer.end(), set1.begin(), set1.end());
   	  //drawPointsColored(vertices.data(), vertices.size(), distances, 1);
   	  delete[] distances;
   	  return answer;
   }
 
-  std::vector<b2Vec2> quickHull(std::vector<b2Vec2> vertices) {
+  std::vector<b2Vec2> quickHull(std::vector<b2Vec2> vertices, std::vector<b2Vec2>* leftovers) {
 	  //find left and right
 	  std::vector<b2Vec2> answer;
 
@@ -137,8 +239,8 @@ void SetTranslate(float x, float y, bool override) {
 			  }
 		  }
 
-		  set1 = subHull(*minIterator, *maxIterator, set1);  //order?
-		  set2 = subHull(*maxIterator, *minIterator, set2);
+		  set1 = subHull(*minIterator, *maxIterator, set1, leftovers);  //order?
+		  set2 = subHull(*maxIterator, *minIterator, set2, leftovers);
 
 		  /*b2Color color1(0,0.5,0);
 		  drawPoly(set1.data(), set1.size(), color1);
@@ -146,12 +248,12 @@ void SetTranslate(float x, float y, bool override) {
 		  color1.Set(0,0,0.7);
 		  drawPoly(set2.data(), set2.size(), color1);*/
 
-		  answer.insert(answer.end(), set1.begin(), set1.end());
+		  answer.insert(answer.end(), set2.begin(), set2.end());
 
 		  if (minIterator != maxIterator)
 		      answer.push_back(*maxIterator);
 
-		  answer.insert(answer.end(), set2.begin(), set2.end());
+		  answer.insert(answer.end(), set1.begin(), set1.end());
 
 	  }
 
@@ -200,6 +302,9 @@ void SetTranslate(float x, float y, bool override) {
 
 	  glColor4f(color.r, color.g, color.b, 1);
 
+	  /*b2Vec2* points2 = new b2Vec2[vertexCount];
+	  for (int i=0; i<vertexCount; i++)
+		  points2[vertexCount-i-1] = points[i];*/
 	  glEnableClientState(GL_VERTEX_ARRAY);
 	  glVertexPointer(2, GL_FLOAT, 0, points);
 	  glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);

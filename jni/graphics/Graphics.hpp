@@ -39,11 +39,14 @@ void SetTranslate(float x, float y, bool override = true);
   void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number);
   void DrawDigit(float x, float y, float sizex, float sizey, unsigned int digit);
 
+  std::vector<std::vector<b2Vec2>> findClusters(std::vector<b2Vec2> vertices, float threshold);
+  float getPointsRadius(std::vector<b2Vec2> vertices);
   void drawEllipse(b2Vec2 center, float radius, b2Color color, int numPoints = 6);
   void drawPoints(const b2Vec2* points, int32 vertexCount, b2Color color, float radius, int numPoints = 6);
   void drawPointsColored(const b2Vec2* points, int32 vertexCount, float* color, float radius, int numPoints = 6);
   void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color);
-  std::vector<b2Vec2> quickHull(std::vector<b2Vec2> vertices);
+  std::vector<b2Vec2> smoothSurface(std::vector<b2Vec2> vertices, int iterations, float smoothRatio);
+  std::vector<b2Vec2> quickHull(std::vector<b2Vec2> vertices, std::vector<b2Vec2>* leftovers = nullptr);
   //void DrawPlayer(const Player & player);
   //void DrawObstacle(const Asteroid & asteroid);
   //void DrawDecorateStar(const DecorateStar & star);
