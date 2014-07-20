@@ -61,13 +61,13 @@ private:
     static constexpr const auto playerEyesCount = 2;
     static constexpr const auto playerStatesCount = 3;
     static constexpr const auto playerBodySize = 0.5f;
-    static constexpr const auto playerEyeSize = 0.6f;
+    static constexpr const auto playerEyeSize = 1.5f;
     static constexpr const auto playerBodyDencity = 1.0f;
     static constexpr const auto playerEyeDencity = 0.25f;
 
     static constexpr const auto playerBodyFriction = 0.5f;
     static constexpr const auto playerEyeFriction = 0.5f;
-    static constexpr const auto borderFriction = 0.1f;
+    static constexpr const auto borderFriction = 0.0f;
 
     static constexpr const auto playerBodyRestitution = 0.25f;
     static constexpr const auto playerEyeRestitution = 0.5f;
@@ -77,9 +77,9 @@ private:
     static constexpr const auto playerEyeCategory = 2;
     static constexpr const auto borderCategory = 4;
 
-    const std::vector<float> playerGravityStates { -12.8, -9.8, 1.0 };
-    const std::vector<float> playerAngleStates { 0.0, -300, -700 };
-    const std::vector<float> playerForceStates { 1.25, 0.0, 0.05 };
+    const std::vector<float> playerGravityStates { -18.8, -9.8, 2.0 };
+    const std::vector<float> playerAngleStates { 0.0, -300, -800 };
+    const std::vector<float> playerForceStates { 3.25, 0.0, 0.05 };
     const std::vector<float> playerEyeBodyForceStates { 1.0, 1.0, 0.0 };
     const std::vector<float> playerEyeAntigravStates { 0.0, 0.0, -4.0f };
 
@@ -100,6 +100,8 @@ private:
 
     b2World world;
 
+    float camPos = 0.0f;
+
     /// player
 
     float playerState = 0.0f;
@@ -117,6 +119,7 @@ private:
     std::vector<std::shared_ptr<b2Shape>> playerBodiesShapes;
 
     b2Vec2 playerBodiesPointsMiddle;
+    b2Vec2 playerVelocityMiddle;
 
     std::vector<b2Vec2> playerEyesBodiesPoints;
     std::vector<b2Body*> playerEyesBodies;
@@ -136,8 +139,15 @@ private:
         { playerAngleStates.data(), playerAngleState },
         { playerForceStates.data(), playerForceState },
         { playerEyeBodyForceStates.data(), playerEyeBodyForceState },
-        { playerEyeAntigravStates.data(), playerEyeAntigravState },
+        { playerEyeAntigravStates.data(), playerEyeAntigravState }
     };
+
+    // obstacles
+
+    std::shared_ptr<b2Shape> bottomObstacleShape;
+    b2Body* bottomObstacle;
+    std::shared_ptr<b2Shape> topObstacleShape;
+    b2Body* topObstacle;
 };
 
 }

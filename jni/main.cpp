@@ -235,71 +235,71 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 		case AMOTION_EVENT_ACTION_POINTER_DOWN:
 		  break;
 		case AMOTION_EVENT_ACTION_MOVE:
-		  if (playerslot0 == -1) {
-			if (playerslot1 == id0) {
-			  if (count > 1) {
-				playerslot0 = id1;
-				playerslot0index = 1;
-				application.Touch(0,
-								  getX(playerslot0index),
-								  getY(playerslot0index));
-			  }
-			}
-			else {
-			  playerslot0 = id0;
-			  playerslot0index = 0;
-			  application.Touch(0,
-								getX(playerslot0index),
-								getY(playerslot0index));
-			}
-		  }
-		  else {
-			if (playerslot0 == id0) {
-			  playerslot0index = 0;
-			  application.Touch(0,
-								getX(playerslot0index),
-								getY(playerslot0index));
-			}
-			else if (playerslot0 == id1 && count > 1) {
-			  playerslot0index = 1;
-			  application.Touch(0,
-								getX(playerslot0index),
-								getY(playerslot0index));
-			}
-		  }
+		  // if (playerslot0 == -1) {
+		  //   if (playerslot1 == id0) {
+		  //     if (count > 1) {
+		  //   	playerslot0 = id1;
+		  //   	playerslot0index = 1;
+		  //   	application.Touch(0,
+		  //   					  getX(playerslot0index),
+		  //   					  getY(playerslot0index));
+		  //     }
+		  //   }
+		  //   else {
+		  //     playerslot0 = id0;
+		  //     playerslot0index = 0;
+		  //     application.Touch(0,
+		  //   					getX(playerslot0index),
+		  //   					getY(playerslot0index));
+		  //   }
+		  // }
+		  // else {
+		  //   if (playerslot0 == id0) {
+		  //     playerslot0index = 0;
+		  //     application.Touch(0,
+		  //   					getX(playerslot0index),
+		  //   					getY(playerslot0index));
+		  //   }
+		  //   else if (playerslot0 == id1 && count > 1) {
+		  //     playerslot0index = 1;
+		  //     application.Touch(0,
+		  //   					getX(playerslot0index),
+		  //   					getY(playerslot0index));
+		  //   }
+		  // }
 
-		  if (playerslot1 == -1) {
-			if (playerslot0 == id0) {
-			  if (count > 1) {
-				playerslot1index = 1;
-				playerslot1 = id1;
-				application.Touch(1,
-								  getX(playerslot1index),
-								  getY(playerslot1index));
-			  }
-			}
-			else {
-			  playerslot1index = 0;
-			  playerslot1 = id0;
-			  application.Touch(1,
-								getX(playerslot1index),
-								getY(playerslot1index));
-			}
-		  }
-		  else {
-			if (playerslot1 == id0) {
-			  playerslot1index = 0;
-			  application.Touch(1,
-								getX(playerslot1index),
-								getY(playerslot1index));
-			}
-			else if (playerslot1 == id1 && count > 1) {
-			  playerslot1index = 1;
-			  application.Touch(1,
-								getX(playerslot1index),
-								getY(playerslot1index));
-			}
-		  }
+		  // if (playerslot1 == -1) {
+		  //   if (playerslot0 == id0) {
+		  //     if (count > 1) {
+		  //   	playerslot1index = 1;
+		  //   	playerslot1 = id1;
+		  //   	application.Touch(1,
+		  //   					  getX(playerslot1index),
+		  //   					  getY(playerslot1index));
+		  //     }
+		  //   }
+		  //   else {
+		  //     playerslot1index = 0;
+		  //     playerslot1 = id0;
+		  //     application.Touch(1,
+		  //   					getX(playerslot1index),
+		  //   					getY(playerslot1index));
+		  //   }
+		  // }
+		  // else {
+		  //   if (playerslot1 == id0) {
+		  //     playerslot1index = 0;
+		  //     application.Touch(1,
+		  //   					getX(playerslot1index),
+		  //   					getY(playerslot1index));
+		  //   }
+		  //   else if (playerslot1 == id1 && count > 1) {
+		  //     playerslot1index = 1;
+		  //     application.Touch(1,
+		  //   					getX(playerslot1index),
+		  //   					getY(playerslot1index));
+		  //   }
+		  // }
 
 		  // if (count == 1) {
 		  // 	if (playerslot0 != -1 && playerslot1 == -1) {
@@ -328,31 +328,32 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 
 		  break;
 		case AMOTION_EVENT_ACTION_UP:
-		  if (id0 != -1) {
-		  	if (id0 == playerslot0) {
-		  	  playerslot0 = -1;
-			  playerslot0index = -1;
-		  	  application.TouchEnd(0, 0, 0);
-		  	}
-		  	else if (id0 == playerslot1) {
-		  	  playerslot1 = -1;
-			  playerslot1index = -1;
-		  	  application.TouchEnd(1, 0, 0);
-		  	}
-		  }
+		  // if (id0 != -1) {
+		  // 	if (id0 == playerslot0) {
+		  // 	  playerslot0 = -1;
+		  //     playerslot0index = -1;
+		  // 	  application.TouchEnd(0, 0, 0);
+		  // 	}
+		  // 	else if (id0 == playerslot1) {
+		  // 	  playerslot1 = -1;
+		  //     playerslot1index = -1;
+		  // 	  application.TouchEnd(1, 0, 0);
+		  // 	}
+		  // }
 
-		  if (count > 1 && id1 != -1) {
-		  	if (id1 == playerslot0) {
-		  	  playerslot0 = -1;
-			  playerslot0index = -1;
-		  	  application.TouchEnd(0, 0, 0);
-		  	}
-		  	else if (id1 == playerslot1) {
-		  	  playerslot1 = -1;
-			  playerslot1index = -1;
-		  	  application.TouchEnd(1, 0, 0);
-		  	}
-		  }
+		  // if (count > 1 && id1 != -1) {
+		  // 	if (id1 == playerslot0) {
+		  // 	  playerslot0 = -1;
+		  //     playerslot0index = -1;
+		  // 	  application.TouchEnd(0, 0, 0);
+		  // 	}
+		  // 	else if (id1 == playerslot1) {
+		  // 	  playerslot1 = -1;
+		  //     playerslot1index = -1;
+		  // 	  application.TouchEnd(1, 0, 0);
+		  // 	}
+		  // }
+            application.TouchEnd(1, 0, 0);
 		  break;
 		case AMOTION_EVENT_ACTION_CANCEL:
 		  break;

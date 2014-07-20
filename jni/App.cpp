@@ -51,7 +51,7 @@ App::App() :
 
 	for (auto i = 0; i < 4; ++i) {
 		const auto shape = new b2PolygonShape;
-		shape->SetAsBox(45, 5);
+		shape->SetAsBox(100, 3);
 
 		b2BodyDef bdef;
 
@@ -125,6 +125,56 @@ App::App() :
 		playerEyesBodies[i] = body;
 		playerEyesBodiesPoints[i] = bdef.position;
 	}
+
+	{
+		const auto shape = new b2PolygonShape;
+		shape->SetAsBox(2, 10);
+
+		b2BodyDef bdef;
+
+		bdef.awake = true;
+		bdef.allowSleep = true;
+		bdef.active = true;
+		bdef.type = b2_kinematicBody;
+
+		const auto body = world.CreateBody(&bdef);
+
+		b2FixtureDef fdef;
+		fdef.shape = shape;
+		fdef.friction = borderFriction;
+		fdef.restitution = borderRestitution;
+		fdef.filter.categoryBits = borderCategory;
+
+		const auto fixt = body->CreateFixture(&fdef);
+
+		topObstacleShape.reset(shape);
+		topObstacle = body;
+	}
+
+	{
+		const auto shape = new b2PolygonShape;
+		shape->SetAsBox(2, 5);
+
+		b2BodyDef bdef;
+
+		bdef.awake = true;
+		bdef.allowSleep = true;
+		bdef.active = true;
+		bdef.type = b2_kinematicBody;
+
+		const auto body = world.CreateBody(&bdef);
+
+		b2FixtureDef fdef;
+		fdef.shape = shape;
+		fdef.friction = borderFriction;
+		fdef.restitution = borderRestitution;
+		fdef.filter.categoryBits = borderCategory;
+
+		const auto fixt = body->CreateFixture(&fdef);
+
+		bottomObstacleShape.reset(shape);
+		bottomObstacle = body;
+	}
 }
 
 App::~App() {
@@ -146,18 +196,27 @@ void App::Update(double dt) {
 	if (!progress.IsPaused()) {
 		world.Step(dt, 1, 2);
 
-		world.SetGravity({ 5, playerGravityState });
+		world.SetGravity({ 0, playerGravityState });
 
 		// convex points
 
 		playerBodiesPointsMiddle = { 0.0f, 0.0f };
+		playerVelocityMiddle = { 0.0f, 0.0f };
 
 		for (auto i = 0; i < playerBodies.size(); i++) {
 			playerBodiesPoints[i] = playerBodies[i]->GetPosition();
 			playerBodiesPointsMiddle += playerBodiesPoints[i];
+			playerVelocityMiddle += playerBodies[i]->GetLinearVelocity();
 		}
 
 		playerBodiesPointsMiddle = (1.0f / playerBodies.size()) * playerBodiesPointsMiddle;
+		playerVelocityMiddle = (1.0f / playerBodies.size()) * playerVelocityMiddle;
+
+		// cam pos
+
+		camPos = camPos + (playerBodiesPointsMiddle.x - camPos) * dt * 4.0;
+
+		// eye points
 
 		for (auto i = 0; i < playerEyesBodies.size(); i++)
 			playerEyesBodiesPoints[i] = playerEyesBodies[i]->GetPosition();
@@ -198,14 +257,50 @@ void App::Update(double dt) {
 
 		// back respawn
 
-		borderBodies[0]->SetTransform(
-			{ (((int)playerBodiesPointsMiddle.x) / 100) * 100.0f,     0 }, 0);
-		borderBodies[1]->SetTransform(
-			{ (((int)playerBodiesPointsMiddle.x) / 100) * 100.0f,     55 }, 0);
-		borderBodies[2]->SetTransform(
-			{ (((int)playerBodiesPointsMiddle.x) / 100) * 100.0f + 100.0f, 0 }, 0);
-		borderBodies[3]->SetTransform(
-			{ (((int)playerBodiesPointsMiddle.x) / 100) * 100.0f + 100.0f, 55 }, 0);
+		const auto hole1 = rand() % 2 ? 25 : 0;
+		const auto hole2 = rand() % 2 ? 25 : 0;
+
+		if (borderBodies[0]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0) {
+			borderBodies[0]->SetTransform(
+				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 25.0f,     5 }, 0);
+			borderBodies[1]->SetTransform(
+				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 25.0f,     50 }, 0);
+		}
+
+		if (borderBodies[2]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0) {
+			borderBodies[2]->SetTransform(
+				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole1, 5 }, 0);
+			borderBodies[3]->SetTransform(
+				{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole2, 50 }, 0);
+		}
+
+		const auto choice = rand() % 2;
+
+		if (bottomObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f &&
+			topObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f) {
+			if (choice == 0) {
+				bottomObstacle->SetTransform(
+					{ playerBodiesPointsMiddle.x + 75.0f, 10.0f }, bottomObstacle->GetAngle());
+			}
+			else if (choice == 1) {
+				topObstacle->SetTransform(
+					{ playerBodiesPointsMiddle.x + 75.0f, 45.0f }, topObstacle->GetAngle());
+			}
+		}
+
+		for (auto& b1 : playerBodies) {
+			if ((playerBodiesPointsMiddle - b1->GetPosition()).Length() > 20.0) {
+				b1->SetTransform(
+					{ playerBodiesPointsMiddle.x, playerBodiesPointsMiddle.y },
+					b1->GetAngle());
+				b1->SetLinearVelocity(playerVelocityMiddle);
+			}
+		}
+
+		for (auto& b1 : playerBodies) {
+			const auto vel = b1->GetLinearVelocity();
+			b1->SetLinearVelocity({ 40.0f, vel.y });
+		}
 	}
 }
 
@@ -216,7 +311,7 @@ void App::Draw() {
 	progress.Draw();
 
 	if (!progress.IsPaused()) {
-		SetTranslate(50 - playerBodiesPointsMiddle.x, 0);
+		SetTranslate(25 - camPos, 0);
 		shaker.ApplyMatrix();
 
 		world.DrawDebugData();
@@ -229,9 +324,25 @@ void App::Draw() {
 		color.Set(0,0,0.8);
 		//drawPoints(LeftRight.data(), LeftRight.size(),color);
 		drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
-		color.Set(0.7,0,0);
+
+		if (playerStatePoint == 0) {
+			color.Set(0,0,0);
+		}
+		else if (playerStatePoint == 1) {
+			color.Set(0,0,0.5);
+		}
+		else if (playerStatePoint == 2) {
+			color.Set(1,1,0);
+		}
+
 		drawPoints(Outer.data(), Outer.size(),color, 1);
 		//drawPoly(Outer.data(), Outer.size(),color);
+
+		for (auto& e : playerEyesBodiesPoints) {
+			drawPoints((const b2Vec2*)&e, 1, { 0, 0, 0}, 1.6);
+			drawPoints((const b2Vec2*)&e, 1, { 1, 1, 1}, 1.5);
+			drawPoints((const b2Vec2*)&e, 1, { 0, 0, 0}, 0.5);
+		}
 
 		SetTranslate(0, 0);
 		shaker.ApplyMatrix();
@@ -279,6 +390,18 @@ void App::TouchEnd(int player, float newX, float newY) {
 			b2Filter f = e->GetFixtureList()->GetFilterData();
 			f.maskBits = borderCategory | playerBodyCategory | playerEyeCategory;
 			e->GetFixtureList()->SetFilterData(f);
+		}
+	}
+
+	if (playerStatePoint == 0) {
+		for (auto& b1 : playerBodies) {
+			b1->ApplyLinearImpulse({ 0.0f, -100.0f}, {0.0f, 0.0f}, true);
+		}
+	}
+	else if (playerStatePoint == 2) {
+		for (auto& b1 : playerBodies) {
+			const auto vel = b1->GetLinearVelocityFromLocalPoint({ 0, 0});
+			b1->SetLinearVelocity(vel + b2Vec2 { 0, 25.0 });
 		}
 	}
 
