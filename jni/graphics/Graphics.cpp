@@ -366,6 +366,32 @@ void SetTranslate(float x, float y, bool override) {
       glDisable(GL_BLEND);
   }
 
+void drawCreature(std::vector<b2Vec2> vertices, b2Color color, float alpha) {
+	//b2Color color;
+	std::vector < std::vector < b2Vec2 >> bodyClusters = findClusters(vertices, 5);
+	int i = 0;
+	int maxClusters = bodyClusters.size();
+	for (auto cluster : bodyClusters) {
+		//drawPoints(cluster.data(), cluster.size(),color, 1);
+		if (cluster.size() < 4) {
+			cluster = sphericize(cluster, 2, 6);
+		}
+		std::vector<b2Vec2> leftovers;
+		std::vector<b2Vec2> outer;
+		std::vector<b2Vec2> inner;
+		outer = quickHull(cluster, &leftovers);
+		inner = quickHull(leftovers);
+
+		outer = smoothSurface(outer, 4, 0.2);
+		inner = smoothSurface(inner, 4, 0.2);
+
+		b2Color innerColor(color.r*0.7, color.g*0.8, color.b*0.8);
+		drawPoly(outer.data(), outer.size(), innerColor);
+		drawPoly(inner.data(), inner.size(), color);
+		i++;
+	}
+}
+
   void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number) {
 	if (fromLeft) {
 	  std::stack<unsigned int> digits;

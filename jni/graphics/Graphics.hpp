@@ -52,6 +52,9 @@ void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color, float alph
   //void DrawObstacle(const Asteroid & asteroid);
   //void DrawDecorateStar(const DecorateStar & star);
   //void DrawBullet(const Bullet & bullet);
+  void drawCreature(std::vector<b2Vec2> vertices, b2Color color, float alpha);
+
+
   void DrawProgress(const LevelProgress & progress);
 
 }

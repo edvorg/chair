@@ -77,11 +77,15 @@ private:
     static constexpr const auto playerEyeCategory = 2;
     static constexpr const auto borderCategory = 4;
 
+    //{ solid liquid gas }
     const std::vector<float> playerGravityStates { -18.8, -9.8, 2.0 };
     const std::vector<float> playerAngleStates { 0.0, -300, -800 };
     const std::vector<float> playerForceStates { 3.25, 0.0, 0.05 };
     const std::vector<float> playerEyeBodyForceStates { 1.0, 1.0, 0.0 };
     const std::vector<float> playerEyeAntigravStates { 0.0, 0.0, -4.0f };
+    const std::vector<float> playerColorR { 0.5, 0.0, 0.7 };
+    const std::vector<float> playerColorG { 0.5, 0.7, 0.7 };
+    const std::vector<float> playerColorB { 1.0, 1.0, 0.0 };
 
     const std::vector<float> playerStatePoints { 0.0, 0.493519, 1.0 };
 
@@ -113,6 +117,9 @@ private:
     float playerForceState = playerForceStates[playerStatePoint];
     float playerEyeBodyForceState = playerEyeBodyForceStates[playerStatePoint];
     float playerEyeAntigravState = playerEyeAntigravStates[playerStatePoint];
+    float playerColorRState = playerColorR[playerStatePoint];
+    float playerColorGState = playerColorG[playerStatePoint];
+    float playerColorBState = playerColorB[playerStatePoint];
 
 	std::vector<b2Vec2> playerBodiesPoints;
 	std::vector<b2Body*> playerBodies;
@@ -139,7 +146,10 @@ private:
         { playerAngleStates.data(), playerAngleState },
         { playerForceStates.data(), playerForceState },
         { playerEyeBodyForceStates.data(), playerEyeBodyForceState },
-        { playerEyeAntigravStates.data(), playerEyeAntigravState }
+        { playerEyeAntigravStates.data(), playerEyeAntigravState },
+        { playerColorR.data(), playerColorRState },
+        { playerColorG.data(), playerColorGState },
+        { playerColorB.data(), playerColorBState }
     };
 
     // obstacles
