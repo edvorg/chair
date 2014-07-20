@@ -44,7 +44,7 @@ void SetTranslate(float x, float y, bool override = true);
   void drawEllipse(b2Vec2 center, float radius, b2Color color, int numPoints = 6);
   void drawPoints(const b2Vec2* points, int32 vertexCount, b2Color color, float radius, int numPoints = 6);
   void drawPointsColored(const b2Vec2* points, int32 vertexCount, float* color, float radius, int numPoints = 6);
-  void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color);
+void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color, float alpha = 1.0f);
   std::vector<b2Vec2> smoothSurface(std::vector<b2Vec2> vertices, int iterations, float smoothRatio);
   std::vector<b2Vec2> quickHull(std::vector<b2Vec2> vertices, std::vector<b2Vec2>* leftovers = nullptr);
   //void DrawPlayer(const Player & player);

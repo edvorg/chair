@@ -290,7 +290,7 @@ void SetTranslate(float x, float y, bool override) {
 	  }
   }
 
-  void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color) {
+  void drawPoly(const b2Vec2* points, int32 vertexCount, b2Color color, float alpha) {
 
       /*GLfloat vertices[points.size()*2];
 	  int i=0;
@@ -300,7 +300,11 @@ void SetTranslate(float x, float y, bool override) {
 		  i++;
 	  }*/
 
-	  glColor4f(color.r, color.g, color.b, 1);
+      glEnable(GL_BLEND);
+      // glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL__ALPHA);
+      glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      // glBlendFunc (GL_ONE, GL_ONE);
+	  glColor4f(color.r, color.g, color.b, alpha);
 
 	  /*b2Vec2* points2 = new b2Vec2[vertexCount];
 	  for (int i=0; i<vertexCount; i++)
@@ -344,6 +348,7 @@ void SetTranslate(float x, float y, bool override) {
 				  currentColor[3]);
 		glLineWidth(width);*/
 
+      glDisable(GL_BLEND);
   }
 
   void DrawNumber(bool fromLeft, float x, float y, float sizex, float sizey, unsigned int number) {
