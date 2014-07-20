@@ -314,35 +314,86 @@ void App::Draw() {
 		SetTranslate(25 - camPos, 0);
 		shaker.ApplyMatrix();
 
-		world.DrawDebugData();
+//	SetTranslate(0, 0);
+	//progress.Draw();
 
-		//b2Vec2* vertices = playerPoints.data();
-		b2Color color(0.7,0.7,0.7);
-		//drawPoly(vertices, playerPoints.size(),color);
+	//b2Vec2* vertices = playerPoints.data();
+	b2Color color(0.7,0.7,0.7);
+	//drawPoly(vertices, playerPoints.size(),color);
 
-		std::vector<b2Vec2> Outer= quickHull(playerBodiesPoints);
-		color.Set(0,0,0.8);
-		//drawPoints(LeftRight.data(), LeftRight.size(),color);
-		drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
+	std::vector<b2Vec2> leftovers;
+	std::vector<b2Vec2> outer= quickHull(playerBodiesPoints, &leftovers);
+	std::vector<b2Vec2> inner= quickHull(leftovers);
+	//calculate all the points that are left
 
-		if (playerStatePoint == 0) {
-			color.Set(0,0,0);
-		}
-		else if (playerStatePoint == 1) {
-			color.Set(0,0,0.5);
-		}
-		else if (playerStatePoint == 2) {
-			color.Set(1,1,0);
-		}
+	//color.Set(0,0,0.8);
+	//drawPoints(LeftRight.data(), LeftRight.size(),color);
+	//drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
+	color.Set(0.7,0,0);
+	//drawPoints(Outer.data(), Outer.size(),color, 1);
+	//drawPoly(Outer.data(), Outer.size(),color);
 
-		drawPoints(Outer.data(), Outer.size(),color, 1);
-		//drawPoly(Outer.data(), Outer.size(),color);
+	outer = smoothSurface(outer, 4, 0.2);
+	inner = smoothSurface(inner, 4, 0.2);
+	//outer = smoothSurface(outer, 0.2);
+	//inner = smoothSurface(outer, 0.2);
+	//inner = smoothSurface(outer, 0.2);
+	//color.Set(0,0,0.5);
+	//drawPoints(Outer.data(), Outer.size(),color, 1);
 
-		for (auto& e : playerEyesBodiesPoints) {
-			drawPoints((const b2Vec2*)&e, 1, { 0, 0, 0}, 1.6);
-			drawPoints((const b2Vec2*)&e, 1, { 1, 1, 1}, 1.5);
-			drawPoints((const b2Vec2*)&e, 1, { 0, 0, 0}, 0.5);
-		}
+
+	world.DrawDebugData();
+
+
+	drawPoly(outer.data(), outer.size(),color);
+	color.Set(0.8,0,0.05);
+	drawPoly(inner.data(), inner.size(),color);
+	float eyesRadius = 2;
+	float pointsRadius = getPointsRadius(playerBodiesPoints); //maybe take surface radius here?
+	float eyesSizeThreshold = 8;
+	LOGW("POINTS: %f", pointsRadius);
+	if (pointsRadius<eyesSizeThreshold*eyesRadius) {
+		eyesRadius = pointsRadius/eyesSizeThreshold;
+	}
+	for (auto point: playerEyesBodiesPoints) {
+		color.Set(1,1,1);
+		drawEllipse(point, eyesRadius, color, 15);
+		color.Set(0,0,0.7);
+		drawEllipse(point, eyesRadius*0.2, color, 15);
+	}
+
+	/*std::vector<std::vector<b2Vec2>> bodyClusters = findClusters(playerBodiesPoints, 10);
+	int i=0;
+	int maxClusters = bodyClusters.size();
+	for (auto cluster: bodyClusters) {
+		color.Set(1.0*i/maxClusters, 0, 1.0*i/maxClusters);
+		drawPoints(cluster.data(), cluster.size(),color, 1);
+		i++;
+	}*/
+
+
+//
+//		//b2Vec2* vertices = playerPoints.data();
+//		b2Color color(0.7,0.7,0.7);
+//		//drawPoly(vertices, playerPoints.size(),color);
+//
+//		std::vector<b2Vec2> Outer= quickHull(playerBodiesPoints);
+//		color.Set(0,0,0.8);
+//		//drawPoints(LeftRight.data(), LeftRight.size(),color);
+//		drawPoints(playerBodiesPoints.data(), playerBodiesPoints.size(),color, 0.5);
+//
+//		if (playerStatePoint == 0) {
+//			color.Set(0,0,0);
+//		}
+//		else if (playerStatePoint == 1) {
+//			color.Set(0,0,0.5);
+//		}
+//		else if (playerStatePoint == 2) {
+//			color.Set(1,1,0);
+//		}
+//
+//		drawPoints(Outer.data(), Outer.size(),color, 1);
+//		//drawPoly(Outer.data(), Outer.size(),color);
 
 		SetTranslate(0, 0);
 		shaker.ApplyMatrix();
