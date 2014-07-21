@@ -104,6 +104,7 @@ private:
     static constexpr const auto playerBodyCategory = 1;
     static constexpr const auto playerEyeCategory = 2;
     static constexpr const auto borderCategory = 4;
+    static constexpr const auto holeCategory = 8;
 
     static constexpr const auto playerGameVelocityDefault = 30.0f;
 
@@ -177,7 +178,11 @@ private:
     std::vector<b2Body*> borderBodies;
 
     b2Vec2 holeTop;
+    std::shared_ptr<b2Shape> holeTopShape;
+    b2Body* holeTopBody;
     b2Vec2 holeBottom;
+    std::shared_ptr<b2Shape> holeBottomShape;
+    b2Body* holeBottomBody;
 
     /// balancer
 

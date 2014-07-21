@@ -205,6 +205,58 @@ App::App() :
 		bottomHighObstacle = body;
 	}
 
+	{
+		const auto shape = new b2PolygonShape;
+		shape->SetAsBox(12.5, 2);
+
+		b2BodyDef bdef;
+
+		bdef.awake = false;
+		bdef.allowSleep = true;
+		bdef.active = true;
+		bdef.type = b2_kinematicBody;
+		bdef.position.x = -100.0f;
+
+		const auto body = world.CreateBody(&bdef);
+
+		b2FixtureDef fdef;
+		fdef.shape = shape;
+		fdef.friction = borderFriction;
+		fdef.restitution = borderRestitution;
+		fdef.filter.categoryBits = holeCategory;
+
+		const auto fixt = body->CreateFixture(&fdef);
+
+		holeTopShape.reset(shape);
+		holeTopBody = body;
+	}
+
+	{
+		const auto shape = new b2PolygonShape;
+		shape->SetAsBox(12.5, 2);
+
+		b2BodyDef bdef;
+
+		bdef.awake = false;
+		bdef.allowSleep = true;
+		bdef.active = true;
+		bdef.type = b2_kinematicBody;
+		bdef.position.x = -100.0f;
+
+		const auto body = world.CreateBody(&bdef);
+
+		b2FixtureDef fdef;
+		fdef.shape = shape;
+		fdef.friction = borderFriction;
+		fdef.restitution = borderRestitution;
+		fdef.filter.categoryBits = holeCategory;
+
+		const auto fixt = body->CreateFixture(&fdef);
+
+		holeBottomShape.reset(shape);
+		holeBottomBody = body;
+	}
+
 	ComputePoints();
 	RespawnBorders(true);
 }
@@ -216,6 +268,12 @@ App::~App() {
 		world.DestroyBody(b);
 	for (auto& b : borderBodies)
 		world.DestroyBody(b);
+
+	world.DestroyBody(holeTopBody);
+	world.DestroyBody(holeBottomBody);
+	world.DestroyBody(topObstacle);
+	world.DestroyBody(bottomObstacle);
+	world.DestroyBody(bottomHighObstacle);
 }
 
 void App::Init() {
@@ -304,6 +362,7 @@ void App::RespawnBorders(bool force) {
 
 			if (doHole1) {
 				holeBottom = { borderBodies[2]->GetPosition().x + 100 + hole1 * 0.5f, 5.0f };
+				holeBottomBody->SetTransform({ borderBodies[2]->GetPosition().x + 100 + hole1 * 0.5f, 5.0f }, 0);
 			}
 		} else if (borderBodies[2]->GetPosition().x - camPos < - 125.0) {
 			borderBodies[2]->SetTransform({ borderBodies[0]->GetPosition().x + 200 + hole1, 5 }, 0);
@@ -311,6 +370,7 @@ void App::RespawnBorders(bool force) {
 
 			if (doHole1) {
 				holeBottom = { borderBodies[0]->GetPosition().x + 100 + hole1 * 0.5f, 5.0f };
+				holeBottomBody->SetTransform({ borderBodies[0]->GetPosition().x + 100 + hole1 * 0.5f, 5.0f }, 0);
 			}
 		}
 
@@ -320,13 +380,15 @@ void App::RespawnBorders(bool force) {
 
 			if (doHole2) {
 				holeTop = { borderBodies[3]->GetPosition().x + 100 + hole2 * 0.5f, 50.0f };
+				holeTopBody->SetTransform({ borderBodies[3]->GetPosition().x + 100 + hole2 * 0.5f, 50.0f }, 0);
 			}
 		} else if (borderBodies[3]->GetPosition().x - camPos < - 125.0) {
-			borderBodies[3]->SetTransform({ borderBodies[1]->GetPosition().x + 200 + hole2, 50 }, 0);
+			borderBodies[3]->SetTransform({ borderBodies[1]->GetPosition().x + 200 + hole2, 50.0f }, 0);
 			borderBodies[3]->SetAwake(false);
 
 			if (doHole2) {
 				holeTop = { borderBodies[1]->GetPosition().x + 100 + hole2 * 0.5f, 50.0f };
+				holeTopBody->SetTransform({ borderBodies[1]->GetPosition().x + 100 + hole2 * 0.5f, 50.0f }, 0);
 			}
 		}
 	}
@@ -662,6 +724,10 @@ void App::GoSolid() {
 	for (auto& b1 : playerBodies) {
 		const auto vel = b1->GetLinearVelocityFromLocalPoint({ 0, 0});
 		b1->SetLinearVelocity(vel + b2Vec2 { 0, -100.0 });
+
+		b2Filter f = b1->GetFixtureList()->GetFilterData();
+		f.maskBits = borderCategory | holeCategory | playerBodyCategory | playerEyeCategory;
+		b1->GetFixtureList()->SetFilterData(f);
 	}
 }
 
@@ -672,6 +738,12 @@ void App::GoLiquid() {
 		b2Filter f = e->GetFixtureList()->GetFilterData();
 		f.maskBits = borderCategory | playerBodyCategory | playerEyeCategory;
 		e->GetFixtureList()->SetFilterData(f);
+	}
+
+	for (auto& b1 : playerBodies) {
+		b2Filter f = b1->GetFixtureList()->GetFilterData();
+		f.maskBits = borderCategory | playerBodyCategory | playerEyeCategory;
+		b1->GetFixtureList()->SetFilterData(f);
 	}
 }
 
@@ -687,6 +759,10 @@ void App::GoGas() {
 	for (auto& b1 : playerBodies) {
 		const auto vel = b1->GetLinearVelocityFromLocalPoint({ 0, 0});
 		b1->SetLinearVelocity(vel + b2Vec2 { 0, 40.0 });
+
+		b2Filter f = b1->GetFixtureList()->GetFilterData();
+		f.maskBits = borderCategory | playerBodyCategory;
+		b1->GetFixtureList()->SetFilterData(f);
 	}
 }
 
