@@ -105,12 +105,12 @@ private:
     static constexpr const auto playerEyeCategory = 2;
     static constexpr const auto borderCategory = 4;
 
-    static constexpr const auto playerGameVelocityDefault = 40.0f;
+    static constexpr const auto playerGameVelocityDefault = 30.0f;
 
     //{ solid liquid gas }
-    const std::vector<float> playerGravityStates { -18.8, -9.8, 4.0 };
+    const std::vector<float> playerGravityStates { -18.8, -9.8, 5.0 };
     const std::vector<float> playerAngleStates { 0.0, -300, -800 };
-    const std::vector<float> playerForceStates { 3.25, 0.0, 0.05 };
+    const std::vector<float> playerForceStates { 3.25, 0.05, 0.1 };
     const std::vector<float> playerEyeBodyForceStates { 1.0, 1.0, 0.0 };
     const std::vector<float> playerEyeAntigravStates { 0.0, 0.0, -30.0f };
     const std::vector<float> playerColorR { 0.7, 0.0, 0.6 };
@@ -173,8 +173,6 @@ private:
 
     /// borders
 
-    float borderVelocity = -30.0f;
-
     std::vector<std::shared_ptr<b2Shape>> borderShapes;
     std::vector<b2Body*> borderBodies;
 
@@ -198,6 +196,8 @@ private:
 
     std::shared_ptr<b2Shape> bottomObstacleShape;
     b2Body* bottomObstacle;
+    std::shared_ptr<b2Shape> bottomHighObstacleShape;
+    b2Body* bottomHighObstacle;
     std::shared_ptr<b2Shape> topObstacleShape;
     b2Body* topObstacle;
 };

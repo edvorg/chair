@@ -58,7 +58,7 @@ App::App() :
 
 		b2BodyDef bdef;
 
-		bdef.awake = true;
+		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
 		bdef.type = b2_kinematicBody;
@@ -132,11 +132,11 @@ App::App() :
 
 	{
 		const auto shape = new b2PolygonShape;
-		shape->SetAsBox(2, 10);
+		shape->SetAsBox(2, 13);
 
 		b2BodyDef bdef;
 
-		bdef.awake = true;
+		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
 		bdef.type = b2_kinematicBody;
@@ -161,7 +161,7 @@ App::App() :
 
 		b2BodyDef bdef;
 
-		bdef.awake = true;
+		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
 		bdef.type = b2_kinematicBody;
@@ -179,6 +179,34 @@ App::App() :
 		bottomObstacleShape.reset(shape);
 		bottomObstacle = body;
 	}
+
+	{
+		const auto shape = new b2PolygonShape;
+		shape->SetAsBox(2, 7);
+
+		b2BodyDef bdef;
+
+		bdef.awake = false;
+		bdef.allowSleep = true;
+		bdef.active = true;
+		bdef.type = b2_kinematicBody;
+
+		const auto body = world.CreateBody(&bdef);
+
+		b2FixtureDef fdef;
+		fdef.shape = shape;
+		fdef.friction = borderFriction;
+		fdef.restitution = borderRestitution;
+		fdef.filter.categoryBits = borderCategory;
+
+		const auto fixt = body->CreateFixture(&fdef);
+
+		bottomHighObstacleShape.reset(shape);
+		bottomHighObstacle = body;
+	}
+
+	ComputePoints();
+	RespawnBorders(true);
 }
 
 App::~App() {
@@ -194,7 +222,7 @@ void App::Init() {
 }
 
 void App::ComputeCampPos(double dt) {
-	camPos = camPos + (playerBodiesPointsMiddle.x - camPos) * dt * 4.0;
+	camPos = camPos + (playerBodiesPointsMiddle.x - camPos) * dt * playerGameVelocity;
 }
 
 void App::ComputePoints() {
@@ -261,41 +289,66 @@ void App::RespawnBorders(bool force) {
 	const auto hole1 = doHole1 ? 15 : 0;
 	const auto hole2 = doHole2 ? 15 : 0;
 
-	if (borderBodies[0]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0 || force) {
-		borderBodies[0]->SetTransform(
-			{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 25.0f,     5 }, 0);
-		borderBodies[1]->SetTransform(
-			{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 25.0f,     50 }, 0);
+	if (force) {
+		borderBodies[0]->SetTransform({ camPos, 5 }, 0);
+		borderBodies[1]->SetTransform({ camPos, 50 }, 0);
+		borderBodies[2]->SetTransform({ borderBodies[0]->GetPosition().x + 200 + hole1, 5 }, 0);
+		borderBodies[3]->SetTransform({ borderBodies[1]->GetPosition().x + 200 + hole2, 50 }, 0);
+		borderBodies[2]->SetAwake(false);
+		borderBodies[3]->SetAwake(false);
 	}
+	else {
+		if (borderBodies[0]->GetPosition().x - camPos < - 125.0) {
+			borderBodies[0]->SetTransform({ borderBodies[2]->GetPosition().x + 200 + hole1, 5 }, 0);
+			borderBodies[0]->SetAwake(false);
 
-	if (borderBodies[2]->GetPosition().x - playerBodiesPointsMiddle.x < 50.0 || force) {
-		borderBodies[2]->SetTransform(
-			{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole1, 5 }, 0);
-		borderBodies[3]->SetTransform(
-			{ (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 225.0f + hole2, 50 }, 0);
+			if (doHole1) {
+				holeBottom = { borderBodies[2]->GetPosition().x + 100 + hole1 * 0.5f, 5.0f };
+			}
+		} else if (borderBodies[2]->GetPosition().x - camPos < - 125.0) {
+			borderBodies[2]->SetTransform({ borderBodies[0]->GetPosition().x + 200 + hole1, 5 }, 0);
+			borderBodies[2]->SetAwake(false);
 
-		if (doHole1) {
-			holeBottom = { (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 125.0f + hole1 * 0.5f, 5.0f };
+			if (doHole1) {
+				holeBottom = { borderBodies[0]->GetPosition().x + 100 + hole1 * 0.5f, 5.0f };
+			}
 		}
 
-		if (doHole2) {
-			holeTop = { (((int)playerBodiesPointsMiddle.x) / 200) * 200.0f + 125.0f + hole2 * 0.5f, 45.0f };
+		if (borderBodies[1]->GetPosition().x - camPos < - 125.0) {
+			borderBodies[1]->SetTransform({ borderBodies[3]->GetPosition().x + 200 + hole2, 50 }, 0);
+			borderBodies[1]->SetAwake(false);
+
+			if (doHole2) {
+				holeTop = { borderBodies[3]->GetPosition().x + 100 + hole2 * 0.5f, 50.0f };
+			}
+		} else if (borderBodies[3]->GetPosition().x - camPos < - 125.0) {
+			borderBodies[3]->SetTransform({ borderBodies[1]->GetPosition().x + 200 + hole2, 50 }, 0);
+			borderBodies[3]->SetAwake(false);
+
+			if (doHole2) {
+				holeTop = { borderBodies[1]->GetPosition().x + 100 + hole2 * 0.5f, 50.0f };
+			}
 		}
 	}
 }
 
 void App::RespawnObstacles(bool force) {
-	const auto choice = rand() % 2;
+	const auto choice = rand() % 3;
 
-	if (bottomObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f &&
-		topObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f) {
+	if (bottomObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f
+		&& bottomHighObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f
+		&& topObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f) {
 		if (choice == 0) {
 			bottomObstacle->SetTransform(
 				{ playerBodiesPointsMiddle.x + 75.0f, 10.0f }, bottomObstacle->GetAngle());
 		}
 		else if (choice == 1) {
+			bottomHighObstacle->SetTransform(
+				{ playerBodiesPointsMiddle.x + 75.0f, 14.0f }, bottomObstacle->GetAngle());
+		}
+		else if (choice == 2) {
 			topObstacle->SetTransform(
-				{ playerBodiesPointsMiddle.x + 75.0f, 45.0f }, topObstacle->GetAngle());
+				{ playerBodiesPointsMiddle.x + 75.0f, 39.0f }, topObstacle->GetAngle());
 		}
 	}
 }
@@ -312,15 +365,16 @@ void App::FalloutHoles() {
 				   std::abs(b->GetPosition().y - holeTop.y) < 25.0f) {
 			b->SetLinearVelocity({ 0.0f, 40.0f });
 		} else if (!playerBodiesFallen[b]) {
-			const auto vel = b->GetLinearVelocity();
-			b->SetLinearVelocity({ playerGameVelocity, vel.y });
+			// const auto vel = b->GetLinearVelocity();
+			// b->SetLinearVelocity({ playerGameVelocity, vel.y });
+			b->ApplyForceToCenter({ playerGameVelocity, 0.0f }, true);
 		}
 	}
 }
 
 void App::RespawnParticles() {
 	for (auto& b1 : playerBodies) {
-		if (b1->GetPosition().x < camPos) {
+		if (b1->GetPosition().x < camPos - 25.0f) {
 			b1->SetTransform(
 				{ playerBodiesPointsMiddle.x, playerBodiesPointsMiddle.y },
 				b1->GetAngle());
@@ -426,8 +480,8 @@ void App::Update(double dt) {
 			auto fallenCount = 0;
 
 			for (auto& b : playerBodies) {
-				if (b->GetPosition().y < 2.0
-					|| b->GetPosition().y > 50.0f) {
+				if (b->GetPosition().y < 0.0
+					|| b->GetPosition().y > 52.0f) {
 					playerBodiesFallen[b] = true;
 					fallenCount++;
 				}
@@ -436,7 +490,7 @@ void App::Update(double dt) {
 				}
 			}
 
-			if (fallenCount > playerBodiesCount / 2 ) {
+			if (fallenCount > playerBodiesCount / 3 ) {
 				progress.RestartGame();
 
 				for (auto& b : playerBodies) {
@@ -606,7 +660,8 @@ void App::GoSolid() {
 	}
 
 	for (auto& b1 : playerBodies) {
-		b1->ApplyLinearImpulse({ 0.0f, -100.0f}, {0.0f, 0.0f}, true);
+		const auto vel = b1->GetLinearVelocityFromLocalPoint({ 0, 0});
+		b1->SetLinearVelocity(vel + b2Vec2 { 0, -100.0 });
 	}
 }
 
