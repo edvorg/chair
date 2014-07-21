@@ -162,6 +162,7 @@ private:
 	std::vector<b2Body*> playerBodies;
     std::vector<std::shared_ptr<b2Shape>> playerBodiesShapes;
     std::unordered_map<b2Body*, bool> playerBodiesFallen;
+    std::unordered_map<b2Body*, float> playerBodiesStucks;
 
     b2Vec2 playerBodiesPointsMiddle;
     b2Vec2 playerVelocityMiddle;

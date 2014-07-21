@@ -557,18 +557,31 @@ void App::Update(double dt) {
 
 		// mark stuck bodies
 
-		if (time > 1.0) {
-
+		if (time > 2.0) {
 			auto fallenCount = 0;
 
 			for (auto& b : playerBodies) {
-				if (b->GetPosition().y < 0.0
-					|| b->GetPosition().y > 52.0f) {
-					playerBodiesFallen[b] = true;
-					fallenCount++;
+				if (std::abs(b->GetLinearVelocity().x) < 6.0f
+					&& std::abs(b->GetLinearVelocity().y) < 10.0f
+					) {
+					playerBodiesStucks[b] += dt;
+
+					if (playerBodiesStucks[b] > 0.75f) {
+						playerBodiesFallen[b] = true;
+						fallenCount++;
+					}
 				}
 				else {
-					playerBodiesFallen[b] = false;
+					playerBodiesStucks[b] = 0;
+
+					if (b->GetPosition().y < 0.0
+						|| b->GetPosition().y > 52.0f) {
+						playerBodiesFallen[b] = true;
+						fallenCount++;
+					}
+					else {
+						playerBodiesFallen[b] = false;
+					}
 				}
 			}
 
@@ -580,6 +593,7 @@ void App::Update(double dt) {
 					const float y = 15 + rand() % 30;
 					b->SetTransform({ x, y }, 0);
 					playerBodiesFallen[b] = false;
+					playerBodiesStucks[b] = 0.0f;
 				}
 
 				for (auto& e : playerEyesBodies) {

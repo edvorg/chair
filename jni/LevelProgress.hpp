@@ -52,7 +52,7 @@ public:
 	const float playLineWidth = 8.0f;
 	const float playButtonSize = 0.1f;
 	// delay after which play button becomes enabled
-	const float startTimerPeriod = 1.0f;
+	const float startTimerPeriod = 0.5f;
 
 	const float getFieldWidth() const { return fieldWidth; }
 	const float getFieldHeight() const { return fieldHeight; }
