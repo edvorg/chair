@@ -17,7 +17,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := libpng
-LOCAL_SRC_FILES := png/libpng.a
+
+LOCAL_SRC_FILES := png/$(TARGET_ARCH_ABI)/libpng.a
 
 include $(PREBUILT_STATIC_LIBRARY)
 
