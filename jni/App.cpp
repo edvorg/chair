@@ -352,6 +352,17 @@ void App::RespawnBorders(bool force) {
 		borderBodies[1]->SetTransform({ camPos, 50 }, 0);
 		borderBodies[2]->SetTransform({ borderBodies[0]->GetPosition().x + 200 + hole1, 5 }, 0);
 		borderBodies[3]->SetTransform({ borderBodies[1]->GetPosition().x + 200 + hole2, 50 }, 0);
+
+		if (doHole1) {
+			holeBottom = { borderBodies[0]->GetPosition().x + 100 + hole1 * 0.5f, 5.0f };
+			holeBottomBody->SetTransform({ borderBodies[0]->GetPosition().x + 100 + hole1 * 0.5f, 5.0f }, 0);
+		}
+
+		if (doHole2) {
+			holeTop = { borderBodies[1]->GetPosition().x + 100 + hole2 * 0.5f, 50.0f };
+			holeTopBody->SetTransform({ borderBodies[1]->GetPosition().x + 100 + hole2 * 0.5f, 50.0f }, 0);
+		}
+
 		borderBodies[2]->SetAwake(false);
 		borderBodies[3]->SetAwake(false);
 	}
