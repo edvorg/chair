@@ -412,16 +412,25 @@ void App::RespawnObstacles(bool force) {
 		&& bottomHighObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f
 		&& topObstacle->GetPosition().x - playerBodiesPointsMiddle.x < -75.0f) {
 		if (choice == 0) {
+			auto x = playerBodiesPointsMiddle.x + 75.0f;
+			if (std::abs(holeBottom.x - x) < 13) x = holeBottom.x +
+													 (rand() % 2 ? 13 : - 13);
 			bottomObstacle->SetTransform(
-				{ playerBodiesPointsMiddle.x + 75.0f, 10.0f }, bottomObstacle->GetAngle());
+				{ x, 10.0f }, bottomObstacle->GetAngle());
 		}
 		else if (choice == 1) {
+			auto x = playerBodiesPointsMiddle.x + 75.0f;
+			if (std::abs(holeBottom.x - x) < 13) x = holeBottom.x +
+													 (rand() % 2 ? 13 : - 13);
 			bottomHighObstacle->SetTransform(
-				{ playerBodiesPointsMiddle.x + 75.0f, 14.0f }, bottomObstacle->GetAngle());
+				{ x, 14.0f }, bottomObstacle->GetAngle());
 		}
 		else if (choice == 2) {
+			auto x = playerBodiesPointsMiddle.x + 75.0f;
+			if (std::abs(holeTop.x - x) < 13) x = holeTop.x +
+												  (rand() % 2 ? 13 : - 13);
 			topObstacle->SetTransform(
-				{ playerBodiesPointsMiddle.x + 75.0f, 39.0f }, topObstacle->GetAngle());
+				{ x, 39.0f }, topObstacle->GetAngle());
 		}
 	}
 }
