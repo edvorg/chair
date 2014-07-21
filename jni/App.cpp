@@ -216,7 +216,7 @@ void App::ComputePoints() {
 	playerBodiesPointsMiddle = (1.0f / count) * playerBodiesPointsMiddle;
 	playerVelocityMiddle = (1.0f / count) * playerVelocityMiddle;
 
-	// eye points
+// eye points
 
 	for (auto i = 0; i < playerEyesBodies.size(); i++)
 		playerEyesBodiesPoints[i] = playerEyesBodies[i]->GetPosition();
@@ -364,6 +364,17 @@ void App::Update(double dt) {
 
 		world.SetGravity({ 0, playerGravityState });
 
+		// move back
+
+		const auto camPosDelta = camPos - prevCamPos;
+		prevCamPos = camPos;
+
+		backPos -= camPosDelta * 0.75;
+
+		if (backPos < - 100) {
+			backPos = 0.0f;
+		}
+
 		// convex points
 
 		ComputePoints();
@@ -442,6 +453,8 @@ void App::Update(double dt) {
 				}
 
 				camPos = 0;
+				prevCamPos = camPos;
+				backPos = 0.0f;
 				time = 0.0f;
 
 				ComputePoints();
@@ -470,17 +483,17 @@ void drawTexture(const GLuint texture,
 				 const float scaleTcY) {
 
 	b2Vec2 points[] = {
-			{x,y},
-			{x + width, y},
-			{x,y + height},
-			{x + width,y + height}
+		{x,y},
+		{x + width, y},
+		{x,y + height},
+		{x + width,y + height}
 	};
 
 	b2Vec2 tex[] = {
-				{0,0},
-				{width * scaleTcX,0},
-				{0,1},
-				{width * scaleTcX,1}
+		{0,0},
+		{width * scaleTcX,0},
+		{0,1},
+		{width * scaleTcX,1}
 	};
 
 	glColor4f(0.5, 0.5, 0.5, 1);
@@ -513,8 +526,8 @@ void App::Draw() {
 		SetTranslate(0, 0);
 		shaker.ApplyMatrix();
 
-		drawTexture(texture, 0, 0, fieldWidth, fieldHeight, 1.0f / fieldWidth, 1.0f);
-		checkGlError("test");
+		drawTexture(texture, backPos, 0, 100, fieldHeight, 1.0f / 100, 1.0f);
+		drawTexture(texture, backPos + 100, 0, 100, fieldHeight, 1.0f / 100, 1.0f);
 
 		// debug data
 

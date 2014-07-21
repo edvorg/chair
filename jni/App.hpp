@@ -135,6 +135,8 @@ private:
     b2World world;
 
     float camPos = 0.0f;
+    float prevCamPos = camPos;
+    float backPos = 0.0f;
 
     unsigned int texture = 0;
     unsigned int bottom = 0;
