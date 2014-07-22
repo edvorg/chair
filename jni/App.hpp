@@ -77,7 +77,7 @@ private:
     void BodyCrossEye();
     void RespawnBorders(bool force);
     void RespawnObstacles(bool force);
-    void FalloutHoles();
+    void FalloutHoles(double dt);
     void RespawnParticles();
     void RespawnEyes();
     void UpdateBalancer(double dt);
@@ -106,7 +106,7 @@ private:
     static constexpr const auto borderCategory = 4;
     static constexpr const auto holeCategory = 8;
 
-    static constexpr const auto playerGameVelocityDefault = 30.0f;
+    static constexpr const auto playerGameVelocityDefault = 50.0f;
 
     //{ solid liquid gas }
     const std::vector<float> playerGravityStates { -18.8, -9.8, 5.0 };

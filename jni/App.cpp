@@ -435,7 +435,7 @@ void App::RespawnObstacles(bool force) {
 	}
 }
 
-void App::FalloutHoles() {
+void App::FalloutHoles(double dt) {
 	for (auto& b : playerBodies) {
 		if (playerStatePoint == 1 &&
 			std::abs(b->GetPosition().x - holeBottom.x) < 2.5f  &&
@@ -446,10 +446,10 @@ void App::FalloutHoles() {
 				   std::abs(b->GetPosition().x - holeTop.x) < 2.5f &&
 				   std::abs(b->GetPosition().y - holeTop.y) < 25.0f) {
 			b->SetLinearVelocity({ 0.0f, 40.0f });
-		} else if (!playerBodiesFallen[b]) {
-			// const auto vel = b->GetLinearVelocity();
-			// b->SetLinearVelocity({ playerGameVelocity, vel.y });
-			b->ApplyForceToCenter({ playerGameVelocity, 0.0f }, true);
+		} else if (!playerBodiesFallen[b]
+				   && std::abs(b->GetLinearVelocity().x) < playerGameVelocity
+			) {
+			b->ApplyForceToCenter({ playerGameVelocity * (float)dt * 100.0f, 0.0f }, true);
 		}
 	}
 }
@@ -541,7 +541,7 @@ void App::Update(double dt) {
 
 		// fall out in holes
 
-		FalloutHoles();
+		FalloutHoles(dt);
 
 		// particles respawn
 
