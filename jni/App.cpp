@@ -61,7 +61,7 @@ App::App() :
 		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
-		bdef.type = b2_kinematicBody;
+		bdef.type = b2_staticBody;
 
 		const auto body = world.CreateBody(&bdef);
 
@@ -139,7 +139,7 @@ App::App() :
 		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
-		bdef.type = b2_kinematicBody;
+		bdef.type = b2_staticBody;
 
 		const auto body = world.CreateBody(&bdef);
 
@@ -164,7 +164,7 @@ App::App() :
 		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
-		bdef.type = b2_kinematicBody;
+		bdef.type = b2_staticBody;
 
 		const auto body = world.CreateBody(&bdef);
 
@@ -189,7 +189,7 @@ App::App() :
 		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
-		bdef.type = b2_kinematicBody;
+		bdef.type = b2_staticBody;
 
 		const auto body = world.CreateBody(&bdef);
 
@@ -214,7 +214,7 @@ App::App() :
 		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
-		bdef.type = b2_kinematicBody;
+		bdef.type = b2_staticBody;
 		bdef.position.x = -100.0f;
 
 		const auto body = world.CreateBody(&bdef);
@@ -240,7 +240,7 @@ App::App() :
 		bdef.awake = false;
 		bdef.allowSleep = true;
 		bdef.active = true;
-		bdef.type = b2_kinematicBody;
+		bdef.type = b2_staticBody;
 		bdef.position.x = -100.0f;
 
 		const auto body = world.CreateBody(&bdef);
