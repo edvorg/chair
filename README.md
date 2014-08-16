@@ -1,3 +1,3 @@
 chair
 =====
-![screenshot](https://github.com/edvorg/chair/screenshot.png "screenshot")
+![screenshot](https://raw.githubusercontent.com/edvorg/chair/master/screenshot.png "screenshot")
